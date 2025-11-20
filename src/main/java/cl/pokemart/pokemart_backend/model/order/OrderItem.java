@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "order_items")
+@Table(name = "items_orden")
 public class OrderItem {
 
     @Id
@@ -32,22 +32,22 @@ public class OrderItem {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "orden_id", nullable = false)
+    private Order orden;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "producto_id")
+    private Product producto;
 
-    @Column(name = "product_name", length = 300, nullable = false)
-    private String productName;
+    @Column(name = "nombre_producto", length = 300, nullable = false)
+    private String nombreProducto;
 
-    @Column(name = "unit_price", nullable = false, precision = 14, scale = 2)
-    private BigDecimal unitPrice;
+    @Column(name = "precio_unitario", nullable = false, precision = 14, scale = 2)
+    private BigDecimal precioUnitario;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "cantidad", nullable = false)
+    private Integer cantidad;
 
-    @Column(name = "line_total", nullable = false, precision = 14, scale = 2)
-    private BigDecimal lineTotal;
+    @Column(name = "total_linea", nullable = false, precision = 14, scale = 2)
+    private BigDecimal totalLinea;
 }

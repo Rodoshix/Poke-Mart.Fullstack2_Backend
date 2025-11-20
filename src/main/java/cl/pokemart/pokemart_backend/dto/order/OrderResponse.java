@@ -12,66 +12,66 @@ import java.util.List;
 @Builder
 public class OrderResponse {
     Long id;
-    String orderNumber;
-    String customerName;
-    String customerEmail;
-    String customerPhone;
-    String shippingStreet;
-    String shippingRegion;
-    String shippingComuna;
-    String shippingReference;
-    String paymentMethod;
-    String status;
+    String numeroOrden;
+    String nombreCliente;
+    String correoCliente;
+    String telefonoCliente;
+    String direccionEnvio;
+    String regionEnvio;
+    String comunaEnvio;
+    String referenciaEnvio;
+    String metodoPago;
+    String estado;
     BigDecimal subtotal;
-    BigDecimal shipping;
-    BigDecimal discount;
-    BigDecimal taxes;
+    BigDecimal costoEnvio;
+    BigDecimal descuento;
+    BigDecimal impuestos;
     BigDecimal total;
-    String createdAt;
-    String updatedAt;
+    String creadoEn;
+    String actualizadoEn;
     List<Item> items;
 
     @Value
     @Builder
     public static class Item {
-        Long productId;
-        String productName;
-        Integer quantity;
-        BigDecimal unitPrice;
-        BigDecimal lineTotal;
+        Long productoId;
+        String nombreProducto;
+        Integer cantidad;
+        BigDecimal precioUnitario;
+        BigDecimal totalLinea;
     }
 
     public static OrderResponse from(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
-                .orderNumber(order.getOrderNumber())
-                .customerName(order.getCustomerName())
-                .customerEmail(order.getCustomerEmail())
-                .customerPhone(order.getCustomerPhone())
-                .shippingStreet(order.getShippingStreet())
-                .shippingRegion(order.getShippingRegion())
-                .shippingComuna(order.getShippingComuna())
-                .shippingReference(order.getShippingReference())
-                .paymentMethod(order.getPaymentMethod())
-                .status(order.getStatus() != null ? order.getStatus().name() : null)
+                .numeroOrden(order.getNumeroOrden())
+                .nombreCliente(order.getNombreCliente())
+                .correoCliente(order.getCorreoCliente())
+                .telefonoCliente(order.getTelefonoCliente())
+                .direccionEnvio(order.getDireccionEnvio())
+                .regionEnvio(order.getRegionEnvio())
+                .comunaEnvio(order.getComunaEnvio())
+                .referenciaEnvio(order.getReferenciaEnvio())
+                .metodoPago(order.getMetodoPago())
+                .estado(order.getEstado() != null ? order.getEstado().name() : null)
                 .subtotal(order.getSubtotal())
-                .shipping(order.getShipping())
-                .discount(order.getDiscount())
-                .taxes(order.getTaxes())
+                .costoEnvio(order.getCostoEnvio())
+                .descuento(order.getDescuento())
+                .impuestos(order.getImpuestos())
                 .total(order.getTotal())
-                .createdAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : null)
-                .updatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt().toString() : null)
+                .creadoEn(order.getCreadoEn() != null ? order.getCreadoEn().toString() : null)
+                .actualizadoEn(order.getActualizadoEn() != null ? order.getActualizadoEn().toString() : null)
                 .items(order.getItems() == null ? List.of() : order.getItems().stream().map(OrderResponse::mapItem).toList())
                 .build();
     }
 
     private static Item mapItem(OrderItem item) {
         return Item.builder()
-                .productId(item.getProduct() != null ? item.getProduct().getId() : null)
-                .productName(item.getProductName())
-                .quantity(item.getQuantity())
-                .unitPrice(item.getUnitPrice())
-                .lineTotal(item.getLineTotal())
+                .productoId(item.getProducto() != null ? item.getProducto().getId() : null)
+                .nombreProducto(item.getNombreProducto())
+                .cantidad(item.getCantidad())
+                .precioUnitario(item.getPrecioUnitario())
+                .totalLinea(item.getTotalLinea())
                 .build();
     }
 }

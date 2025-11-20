@@ -48,20 +48,20 @@ public class OrderService {
         }
 
         Order order = Order.builder()
-                .customer(resolveCustomer(request, currentUser))
-                .customerName((request.getNombre() + " " + request.getApellido()).trim())
-                .customerEmail(request.getEmail())
-                .customerPhone(request.getTelefono())
-                .shippingStreet(joinAddress(request.getCalle(), request.getDepartamento()))
-                .shippingRegion(request.getRegion())
-                .shippingComuna(request.getComuna())
-                .shippingReference(request.getNotas())
-                .paymentMethod(request.getPaymentMethod())
-                .status(OrderStatus.CREATED)
+                .cliente(resolveCustomer(request, currentUser))
+                .nombreCliente((request.getNombre() + " " + request.getApellido()).trim())
+                .correoCliente(request.getCorreo())
+                .telefonoCliente(request.getTelefono())
+                .direccionEnvio(joinAddress(request.getCalle(), request.getDepartamento()))
+                .regionEnvio(request.getRegion())
+                .comunaEnvio(request.getComuna())
+                .referenciaEnvio(request.getNotas())
+                .metodoPago(request.getMetodoPago())
+                .estado(OrderStatus.CREADA)
                 .subtotal(BigDecimal.ZERO)
-                .shipping(BigDecimal.ZERO)
-                .discount(BigDecimal.ZERO)
-                .taxes(BigDecimal.ZERO)
+                .costoEnvio(BigDecimal.ZERO)
+                .descuento(BigDecimal.ZERO)
+                .impuestos(BigDecimal.ZERO)
                 .total(BigDecimal.ZERO)
                 .build();
 
@@ -75,20 +75,20 @@ public class OrderService {
 
         order.setItems(items);
         order.setSubtotal(subtotal);
-        order.setShipping(BigDecimal.ZERO);
-        order.setDiscount(BigDecimal.ZERO);
-        order.setTaxes(BigDecimal.ZERO);
+        order.setCostoEnvio(BigDecimal.ZERO);
+        order.setDescuento(BigDecimal.ZERO);
+        order.setImpuestos(BigDecimal.ZERO);
         order.setTotal(subtotal);
 
         Order saved = orderRepository.save(order);
-        saved.setOrderNumber(generateOrderNumber(saved.getId()));
+        saved.setNumeroOrden(generateOrderNumber(saved.getId()));
         Order persisted = orderRepository.save(saved);
         return OrderResponse.from(persisted);
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponse> listForAdmin() {
-        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
+        return orderRepository.findAllByOrderByCreadoEnDesc().stream()
                 .map(OrderResponse::from)
                 .toList();
     }
@@ -101,10 +101,10 @@ public class OrderService {
     }
 
     private OrderItem toOrderItem(Order order, OrderItemRequest itemReq) {
-        Product product = productRepository.findById(itemReq.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado: " + itemReq.getProductId()));
+        Product product = productRepository.findById(itemReq.getProductoId())
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado: " + itemReq.getProductoId()));
 
-        int quantity = Math.max(1, itemReq.getQuantity());
+        int quantity = Math.max(1, itemReq.getCantidad());
         BigDecimal unitPrice = resolvePrice(product);
         BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
 
@@ -114,12 +114,12 @@ public class OrderService {
         }
 
         return OrderItem.builder()
-                .order(order)
-                .product(product)
-                .productName(product.getName())
-                .unitPrice(unitPrice)
-                .quantity(quantity)
-                .lineTotal(lineTotal)
+                .orden(order)
+                .producto(product)
+                .nombreProducto(product.getName())
+                .precioUnitario(unitPrice)
+                .cantidad(quantity)
+                .totalLinea(lineTotal)
                 .build();
     }
 

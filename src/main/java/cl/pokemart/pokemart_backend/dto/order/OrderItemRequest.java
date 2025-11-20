@@ -7,8 +7,8 @@ import lombok.Value;
 @Value
 public class OrderItemRequest {
     @NotNull
-    Long productId;
+    Long productoId;
     @NotNull
     @Min(1)
-    Integer quantity;
+    Integer cantidad;
 }

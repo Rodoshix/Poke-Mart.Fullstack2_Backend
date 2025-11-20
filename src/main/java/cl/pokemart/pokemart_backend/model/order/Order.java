@@ -33,85 +33,85 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "orders")
+@Table(name = "ordenes")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_number", unique = true, length = 40)
-    private String orderNumber;
+    @Column(name = "numero_orden", unique = true, length = 40)
+    private String numeroOrden;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    private User customer;
+    @JoinColumn(name = "cliente_id")
+    private User cliente;
 
-    @Column(name = "customer_name", length = 200)
-    private String customerName;
+    @Column(name = "nombre_cliente", length = 200)
+    private String nombreCliente;
 
-    @Column(name = "customer_email", length = 200)
-    private String customerEmail;
+    @Column(name = "correo_cliente", length = 200)
+    private String correoCliente;
 
-    @Column(name = "customer_phone", length = 50)
-    private String customerPhone;
+    @Column(name = "telefono_cliente", length = 50)
+    private String telefonoCliente;
 
-    @Column(name = "shipping_street", length = 300)
-    private String shippingStreet;
+    @Column(name = "direccion_envio", length = 300)
+    private String direccionEnvio;
 
-    @Column(name = "shipping_region", length = 120)
-    private String shippingRegion;
+    @Column(name = "region_envio", length = 120)
+    private String regionEnvio;
 
-    @Column(name = "shipping_comuna", length = 120)
-    private String shippingComuna;
+    @Column(name = "comuna_envio", length = 120)
+    private String comunaEnvio;
 
-    @Column(name = "shipping_reference", length = 300)
-    private String shippingReference;
+    @Column(name = "referencia_envio", length = 300)
+    private String referenciaEnvio;
 
-    @Column(name = "payment_method", length = 60)
-    private String paymentMethod;
+    @Column(name = "metodo_pago", length = 60)
+    private String metodoPago;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private OrderStatus status;
+    @Column(name = "status", nullable = false, length = 20)
+    private OrderStatus estado;
 
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal subtotal;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal shipping;
+    @Column(name = "costo_envio", nullable = false, precision = 14, scale = 2)
+    private BigDecimal costoEnvio;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal discount;
+    @Column(name = "descuento", nullable = false, precision = 14, scale = 2)
+    private BigDecimal descuento;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal taxes;
+    @Column(name = "impuestos", nullable = false, precision = 14, scale = 2)
+    private BigDecimal impuestos;
 
-    @Column(nullable = false, precision = 14, scale = 2)
+    @Column(name = "total", nullable = false, precision = 14, scale = 2)
     private BigDecimal total;
 
-    @Column(name = "notes", length = 1000)
-    private String notes;
+    @Column(name = "notas", length = 1000)
+    private String notas;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "creado_en", nullable = false)
+    private LocalDateTime creadoEn;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "actualizado_en", nullable = false)
+    private LocalDateTime actualizadoEn;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
+        this.creadoEn = now;
+        this.actualizadoEn = now;
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.actualizadoEn = LocalDateTime.now();
     }
 }

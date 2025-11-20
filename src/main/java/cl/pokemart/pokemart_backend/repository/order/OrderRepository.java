@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @EntityGraph(attributePaths = {"items", "items.product", "customer"})
-    List<Order> findAllByOrderByCreatedAtDesc();
+    @EntityGraph(attributePaths = {"items", "items.producto", "cliente"})
+    List<Order> findAllByOrderByCreadoEnDesc();
 
-    @EntityGraph(attributePaths = {"items", "items.product", "customer"})
+    @EntityGraph(attributePaths = {"items", "items.producto", "cliente"})
     Optional<Order> findWithItemsById(Long id);
 
     Optional<Order> findTopByOrderByIdDesc();

@@ -19,7 +19,7 @@ public class OrderRequest {
     String apellido;
     @NotBlank
     @Email
-    String email;
+    String correo;
     @Size(max = 50)
     String telefono;
     @Size(max = 120)
@@ -34,7 +34,7 @@ public class OrderRequest {
     @Size(max = 1000)
     String notas;
     @Size(max = 60)
-    String paymentMethod;
+    String metodoPago;
 
     @NotEmpty
     List<@Valid OrderItemRequest> items;

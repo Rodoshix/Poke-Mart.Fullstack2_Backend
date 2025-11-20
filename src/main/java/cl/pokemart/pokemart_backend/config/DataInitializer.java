@@ -113,22 +113,22 @@ public class DataInitializer implements CommandLineRunner {
             User customer = anyClient.orElse(null);
 
             List<Map<String, Object>> items = new java.util.ArrayList<>();
-            items.add(new java.util.HashMap<>(Map.of("productId", products.get(0).getId(), "quantity", 1)));
+            items.add(new java.util.HashMap<>(Map.of("productoId", products.get(0).getId(), "cantidad", 1)));
             if (products.size() > 1) {
-                items.add(new java.util.HashMap<>(Map.of("productId", products.get(1).getId(), "quantity", 2)));
+                items.add(new java.util.HashMap<>(Map.of("productoId", products.get(1).getId(), "cantidad", 2)));
             }
 
             Map<String, Object> request = new java.util.HashMap<>();
             request.put("nombre", customer != null && customer.getProfile() != null ? customer.getProfile().getNombre() : "Cliente");
             request.put("apellido", customer != null && customer.getProfile() != null ? customer.getProfile().getApellido() : "Pokemart");
-            request.put("email", customer != null ? customer.getEmail() : "cliente@pokemart.cl");
+            request.put("correo", customer != null ? customer.getEmail() : "cliente@pokemart.cl");
             request.put("telefono", customer != null && customer.getProfile() != null ? customer.getProfile().getTelefono() : "+56900000000");
             request.put("region", "Kanto");
             request.put("comuna", "Ciudad Central");
             request.put("calle", "Calle Principal 123");
             request.put("departamento", "Depto 101");
             request.put("notas", "Entrega en horario laboral");
-            request.put("paymentMethod", "credit");
+            request.put("metodoPago", "credit");
             request.put("items", items);
 
             // simple idempotency: only create if empty

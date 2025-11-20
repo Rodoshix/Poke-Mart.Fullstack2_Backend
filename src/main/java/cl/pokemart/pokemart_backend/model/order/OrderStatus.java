@@ -1,9 +1,9 @@
 package cl.pokemart.pokemart_backend.model.order;
 
 public enum OrderStatus {
-    CREATED,
-    PAID,
-    SENT,
-    COMPLETED,
-    CANCELLED
+    CREADA,
+    PAGADA,
+    ENVIADA,
+    COMPLETADA,
+    CANCELADA
 }
