@@ -5,6 +5,7 @@ import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
+import cl.pokemart.pokemart_backend.service.order.OrderService;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
@@ -38,21 +39,25 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
+    private final OrderService orderService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DataInitializer(UserService userService,
                            CategoryRepository categoryRepository,
                            ProductRepository productRepository,
-                           ProductOfferRepository productOfferRepository) {
+                           ProductOfferRepository productOfferRepository,
+                           OrderService orderService) {
         this.userService = userService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
+        this.orderService = orderService;
     }
 
     @Override
     public void run(String... args) {
         seedUsersAndCatalog();
+        seedOrdersDemo();
     }
 
     private void seedUsersAndCatalog() {
@@ -95,6 +100,44 @@ public class DataInitializer implements CommandLineRunner {
             );
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
+        }
+    }
+
+    private void seedOrdersDemo() {
+        try {
+            List<Product> products = productRepository.findAllActive();
+            if (products.isEmpty()) return;
+
+            // pick first cliente
+            Optional<User> anyClient = userService.findAll().stream().filter(u -> u.getRole() == Role.CLIENTE).findFirst();
+            User customer = anyClient.orElse(null);
+
+            List<Map<String, Object>> items = new java.util.ArrayList<>();
+            items.add(new java.util.HashMap<>(Map.of("productId", products.get(0).getId(), "quantity", 1)));
+            if (products.size() > 1) {
+                items.add(new java.util.HashMap<>(Map.of("productId", products.get(1).getId(), "quantity", 2)));
+            }
+
+            Map<String, Object> request = new java.util.HashMap<>();
+            request.put("nombre", customer != null && customer.getProfile() != null ? customer.getProfile().getNombre() : "Cliente");
+            request.put("apellido", customer != null && customer.getProfile() != null ? customer.getProfile().getApellido() : "Pokemart");
+            request.put("email", customer != null ? customer.getEmail() : "cliente@pokemart.cl");
+            request.put("telefono", customer != null && customer.getProfile() != null ? customer.getProfile().getTelefono() : "+56900000000");
+            request.put("region", "Kanto");
+            request.put("comuna", "Ciudad Central");
+            request.put("calle", "Calle Principal 123");
+            request.put("departamento", "Depto 101");
+            request.put("notas", "Entrega en horario laboral");
+            request.put("paymentMethod", "credit");
+            request.put("items", items);
+
+            // simple idempotency: only create if empty
+            if (orderService.listForAdmin().isEmpty()) {
+                var orderRequest = objectMapper.convertValue(request, cl.pokemart.pokemart_backend.dto.order.OrderRequest.class);
+                orderService.createOrder(orderRequest, customer);
+            }
+        } catch (Exception e) {
+            log.warn("No se pudieron sembrar ordenes demo: {}", e.getMessage());
         }
     }
 
