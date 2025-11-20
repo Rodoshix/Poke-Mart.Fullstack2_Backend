@@ -134,6 +134,11 @@ public class UserService implements UserDetailsService {
                 .orElseGet(() -> createUser(email, username, rawPassword, firstName, lastName, rut, direccion, region, comuna, fechaNacimiento, telefono, role));
     }
 
+    @Transactional(readOnly = true)
+    public java.util.List<User> findAll() {
+        return userRepository.findAll();
+    }
+
     private String normalize(String value) {
         return value == null ? null : value.trim().toLowerCase();
     }
