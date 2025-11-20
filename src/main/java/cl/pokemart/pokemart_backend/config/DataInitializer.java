@@ -9,10 +9,25 @@ import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.service.user.UserService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -23,6 +38,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DataInitializer(UserService userService,
                            CategoryRepository categoryRepository,
@@ -36,57 +52,153 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        seedUsersAndCatalog();
+    }
+
+    private void seedUsersAndCatalog() {
         try {
-            User admin = userService.ensureUser(
+            // Admin y vendedor con credenciales pedidas
+            userService.ensureUser(
                     "admin@pokemart.cl",
                     "admin",
                     "admin123",
                     "Admin",
                     "Pokemart",
-                    "11.111.111-1",
-                    "Av. Admin 123",
-                    "Metropolitana",
-                    "Santiago",
-                    java.time.LocalDate.of(1990, 1, 1),
+                    "9.876.543-2",
+                    "Oficina Central Pokemart",
+                    "Kanto",
+                    "Ciudad Central",
+                    LocalDate.of(1985, 1, 1),
                     "+56911111111",
                     Role.ADMIN
             );
             User vendor = userService.ensureUser(
                     "vendedor@pokemart.cl",
                     "vendedor",
-                    "vendedor123!",
+                    "vendedor123",
                     "Vendedor",
                     "Pokemart",
                     "22.222.222-2",
                     "Av. Vendedor 456",
-                    "Metropolitana",
-                    "Santiago",
-                    java.time.LocalDate.of(1992, 2, 2),
+                    "Kanto",
+                    "Ciudad Central",
+                    LocalDate.of(1990, 2, 2),
                     "+56922222222",
                     Role.VENDEDOR
             );
-            seedCatalog(vendor);
+
+            seedUsersFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/users.json"));
+            seedCatalogFromJson(
+                    relPath("../Poke-Mart.Fullstack2_React/src/data/productos.json"),
+                    relPath("../Poke-Mart.Fullstack2_React/src/data/ofertas.json"),
+                    vendor
+            );
         } catch (Exception e) {
-            log.warn("No se pudo inicializar usuarios demo: {}", e.getMessage());
+            log.warn("Seed general falló: {}", e.getMessage());
         }
     }
 
-    private void seedCatalog(User seller) {
+    private void seedUsersFromJson(Path jsonPath) {
         try {
-            Category ropa = ensureCategory("ropa", "Ropa");
-            Category transporte = ensureCategory("transporte", "Transporte");
-            Category tecnologia = ensureCategory("tecnologia", "Tecnología");
+            File file = jsonPath.toFile();
+            if (!file.exists()) {
+                log.warn("No se encontró users.json en {}", jsonPath);
+                return;
+            }
+            JsonNode root = objectMapper.readTree(file);
+            JsonNode usersNode = root.has("users") ? root.get("users") : root;
+            if (usersNode != null && usersNode.isArray()) {
+                for (JsonNode u : usersNode) {
+                    String roleStr = u.path("role").asText("cliente").toUpperCase();
+                    Role role = "ADMIN".equals(roleStr) ? Role.ADMIN : "VENDEDOR".equals(roleStr) ? Role.VENDEDOR : Role.CLIENTE;
+                    if (role != Role.CLIENTE) continue; // admin/vendedor ya seedeados
 
-            Product gBien = ensureProduct("Gorra Liga Pokemon", "Gorra oficial de la Liga Pokemon", ropa, seller, "src/assets/img/tienda/productos/gorro-liga-pokemon.png", 900, 120);
-            Product superBall = ensureProduct("Super Ball", "Mayor tasa de captura que la Pokeball.", tecnologia, seller, "src/assets/img/tienda/productos/super-ball.png", 600, 700);
-            Product bicicleta = ensureProduct("Bicicleta de Montaña", "Para recorrer rutas largas.", transporte, seller, "src/assets/img/tienda/productos/bicicleta.png", 80000, 10);
-            Product camiseta = ensureProduct("Camiseta Pikachu", "Camiseta temática Pikachu.", ropa, seller, "src/assets/img/tienda/productos/camiseta-pikachu.png", 1500, 200);
-
-            ensureOffer(gBien, 35, java.time.LocalDateTime.now().plusMonths(2));
-            ensureOffer(superBall, 25, java.time.LocalDateTime.now().plusWeeks(2));
-            ensureOffer(camiseta, 15, java.time.LocalDateTime.now().plusWeeks(2));
+                    String email = u.path("email").asText();
+                    String username = u.path("username").asText();
+                    String password = u.path("password").asText("cliente123");
+                    String nombre = u.path("nombre").asText(null);
+                    String apellido = u.path("apellido").asText(null);
+                    String rut = u.path("run").asText(null);
+                    String direccion = u.path("direccion").asText(null);
+                    String region = u.path("region").asText(null);
+                    String comuna = u.path("comuna").asText(null);
+                    LocalDate fechaNacimiento = null;
+                    try {
+                        String fn = u.path("fechaNacimiento").asText(null);
+                        if (fn != null) fechaNacimiento = LocalDate.parse(fn);
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        userService.ensureUser(
+                                email,
+                                username,
+                                password,
+                                nombre,
+                                apellido,
+                                rut,
+                                direccion,
+                                region,
+                                comuna,
+                                fechaNacimiento,
+                                null,
+                                role
+                        );
+                    } catch (Exception ex) {
+                        log.warn("No se pudo crear usuario {}: {}", username, ex.getMessage());
+                    }
+                }
+            }
         } catch (Exception e) {
-            log.warn("No se pudo inicializar catalogo demo: {}", e.getMessage());
+            log.warn("Error leyendo users.json: {}", e.getMessage());
+        }
+    }
+
+    private void seedCatalogFromJson(Path productsPath, Path offersPath, User seller) {
+        try {
+            File file = productsPath.toFile();
+            if (!file.exists()) {
+                log.warn("No se encontró productos.json en {}", productsPath);
+                return;
+            }
+            List<Map<String, Object>> products = objectMapper.readValue(file, new TypeReference<>() {});
+            Map<String, Category> categories = new HashMap<>();
+
+            for (Map<String, Object> p : products) {
+                String categoria = (String) p.getOrDefault("categoria", "general");
+                String slug = slugify(categoria);
+                Category cat = categories.computeIfAbsent(slug, s -> ensureCategory(s, categoria));
+
+                String name = (String) p.get("nombre");
+                String desc = (String) p.getOrDefault("descripcion", "");
+                String image = (String) p.getOrDefault("imagen", "");
+                BigDecimal price = BigDecimal.valueOf(((Number) p.getOrDefault("precio", 0)).doubleValue());
+                int stock = ((Number) p.getOrDefault("stock", 0)).intValue();
+
+                ensureProduct(name, desc, cat, seller, image, price, stock);
+            }
+
+            File offersFile = offersPath.toFile();
+            if (!offersFile.exists()) {
+                log.warn("No se encontró ofertas.json en {}", offersPath);
+                return;
+            }
+            List<Map<String, Object>> offers = objectMapper.readValue(offersFile, new TypeReference<>() {});
+            for (Map<String, Object> o : offers) {
+                Number productId = (Number) o.get("id");
+                if (productId == null) continue;
+                Product product = productRepository.findById(productId.longValue()).orElse(null);
+                if (product == null) continue;
+                int pct = ((Number) o.getOrDefault("discountPct", 0)).intValue();
+                LocalDateTime endsAt = null;
+                try {
+                    String ends = (String) o.get("endsAt");
+                    if (ends != null) endsAt = OffsetDateTime.parse(ends).toLocalDateTime();
+                } catch (Exception ignored) {
+                }
+                ensureOffer(product, pct, endsAt);
+            }
+        } catch (Exception e) {
+            log.warn("Error cargando catalogo desde json: {}", e.getMessage());
         }
     }
 
@@ -98,7 +210,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
     }
 
-    private Product ensureProduct(String name, String description, Category category, User seller, String imageUrl, int price, int stock) {
+    private Product ensureProduct(String name, String description, Category category, User seller, String imageUrl, BigDecimal price, int stock) {
         return productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst()
@@ -108,14 +220,14 @@ public class DataInitializer implements CommandLineRunner {
                         .category(category)
                         .seller(seller)
                         .imageUrl(imageUrl)
-                        .price(java.math.BigDecimal.valueOf(price))
+                        .price(price)
                         .stock(stock)
                         .active(true)
                         .build()));
     }
 
-    private void ensureOffer(Product product, int discountPct, java.time.LocalDateTime endsAt) {
-        boolean exists = productOfferRepository.findActive(java.time.LocalDateTime.now()).stream()
+    private void ensureOffer(Product product, int discountPct, LocalDateTime endsAt) {
+        boolean exists = productOfferRepository.findActive(LocalDateTime.now()).stream()
                 .anyMatch(o -> o.getProduct().getId().equals(product.getId()));
         if (!exists) {
             productOfferRepository.save(ProductOffer.builder()
@@ -125,5 +237,16 @@ public class DataInitializer implements CommandLineRunner {
                     .active(true)
                     .build());
         }
+    }
+
+    private Path relPath(String relative) {
+        return Path.of(relative).normalize();
+    }
+
+    private String slugify(String input) {
+        if (input == null) return "general";
+        String noAccent = Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return noAccent.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
     }
 }
