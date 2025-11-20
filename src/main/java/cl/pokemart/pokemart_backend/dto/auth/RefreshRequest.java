@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.auth;
+package cl.pokemart.pokemart_backend.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Value;

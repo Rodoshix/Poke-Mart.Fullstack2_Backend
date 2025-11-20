@@ -1,6 +1,6 @@
-package cl.pokemart.pokemart_backend.auth;
+package cl.pokemart.pokemart_backend.dto.auth;
 
-import cl.pokemart.pokemart_backend.user.User;
+import cl.pokemart.pokemart_backend.model.user.User;
 import lombok.Builder;
 import lombok.Value;
 

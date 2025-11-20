@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.common;
+package cl.pokemart.pokemart_backend.controller.common;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;

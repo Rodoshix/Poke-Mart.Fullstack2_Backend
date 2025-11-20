@@ -1,7 +1,7 @@
 package cl.pokemart.pokemart_backend.config;
 
 import cl.pokemart.pokemart_backend.security.JwtAuthenticationFilter;
-import cl.pokemart.pokemart_backend.user.UserService;
+import cl.pokemart.pokemart_backend.service.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

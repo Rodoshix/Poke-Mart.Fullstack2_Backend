@@ -1,5 +1,6 @@
-package cl.pokemart.pokemart_backend.user;
+package cl.pokemart.pokemart_backend.repository.user;
 
+import cl.pokemart.pokemart_backend.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

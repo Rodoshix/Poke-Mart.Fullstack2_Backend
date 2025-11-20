@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.auth;
+package cl.pokemart.pokemart_backend.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,4 +18,10 @@ public class RegisterRequest {
     String password;
     String nombre;
     String apellido;
+    String rut;
+    String direccion;
+    String region;
+    String comuna;
+    String fechaNacimiento; // ISO date string
+    String telefono;
 }

@@ -1,8 +1,12 @@
-package cl.pokemart.pokemart_backend.auth;
+package cl.pokemart.pokemart_backend.controller.auth;
 
+import cl.pokemart.pokemart_backend.dto.auth.AuthResponse;
+import cl.pokemart.pokemart_backend.dto.auth.LoginRequest;
+import cl.pokemart.pokemart_backend.dto.auth.RefreshRequest;
+import cl.pokemart.pokemart_backend.dto.auth.RegisterRequest;
+import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.security.JwtService;
-import cl.pokemart.pokemart_backend.user.User;
-import cl.pokemart.pokemart_backend.user.UserService;
+import cl.pokemart.pokemart_backend.service.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -51,7 +56,13 @@ public class AuthController {
                 request.getUsername(),
                 request.getPassword(),
                 request.getNombre(),
-                request.getApellido()
+                request.getApellido(),
+                request.getRut(),
+                request.getDireccion(),
+                request.getRegion(),
+                request.getComuna(),
+                parseDate(request.getFechaNacimiento()),
+                request.getTelefono()
         );
         return buildTokensForUser(user);
     }
@@ -81,5 +92,13 @@ public class AuthController {
         String refreshToken = jwtService.generateRefreshToken(user);
         long expiresAt = jwtService.extractExpiration(token).getTime();
         return AuthResponse.of(token, expiresAt, refreshToken, user);
+    }
+
+    private LocalDate parseDate(String value) {
+        try {
+            return value != null && !value.isBlank() ? LocalDate.parse(value) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

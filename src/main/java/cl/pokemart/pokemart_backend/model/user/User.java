@@ -1,12 +1,16 @@
-package cl.pokemart.pokemart_backend.user;
+package cl.pokemart.pokemart_backend.model.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -43,12 +48,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "first_name", length = 80)
-    private String firstName;
-
-    @Column(name = "last_name", length = 80)
-    private String lastName;
-
     @Column(name = "avatar_url")
     private String avatarUrl;
 
@@ -59,6 +58,30 @@ public class User implements UserDetails {
     @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private UserProfile profile;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -71,10 +94,13 @@ public class User implements UserDetails {
     }
 
     public String getDisplayName() {
-        if (firstName != null || lastName != null) {
-            return ((Objects.toString(firstName, "") + " " + Objects.toString(lastName, "")).trim());
+        if (profile != null) {
+            String fullName = (Objects.toString(profile.getNombre(), "") + " " + Objects.toString(profile.getApellido(), "")).trim();
+            if (!fullName.isBlank()) {
+                return fullName;
+            }
         }
-        return username;
+        return username != null ? username : email;
     }
 
     @Override

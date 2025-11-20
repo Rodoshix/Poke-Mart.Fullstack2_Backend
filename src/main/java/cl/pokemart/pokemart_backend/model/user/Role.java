@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.user;
+package cl.pokemart.pokemart_backend.model.user;
 
 public enum Role {
     CLIENTE,
