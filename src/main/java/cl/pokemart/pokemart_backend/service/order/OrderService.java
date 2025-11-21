@@ -16,6 +16,7 @@ import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -99,6 +100,28 @@ public class OrderService {
         Order order = orderRepository.findWithItemsById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
         return OrderResponse.from(order);
+    }
+
+    public OrderResponse updateOrderAdmin(Long id, String estado, String notas, String referenciaEnvio) {
+        Order order = orderRepository.findWithItemsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Orden no encontrada"));
+
+        if (StringUtils.hasText(estado)) {
+            try {
+                order.setEstado(OrderStatus.valueOf(estado.trim().toUpperCase()));
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Estado de orden invalido");
+            }
+        }
+        if (notas != null) {
+            order.setNotas(notas);
+        }
+        if (referenciaEnvio != null) {
+            order.setReferenciaEnvio(referenciaEnvio);
+        }
+
+        Order saved = orderRepository.save(order);
+        return OrderResponse.from(saved);
     }
 
     private OrderItem toOrderItem(Order order, OrderItemRequest itemReq) {
