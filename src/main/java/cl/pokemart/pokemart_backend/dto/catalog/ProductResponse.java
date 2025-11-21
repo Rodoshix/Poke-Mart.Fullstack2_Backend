@@ -13,6 +13,7 @@ public class ProductResponse {
     String descripcion;
     BigDecimal precio;
     Integer stock;
+    Integer stockBase;
     String imagenUrl;
     String categoria;
     OfferInfo offer;

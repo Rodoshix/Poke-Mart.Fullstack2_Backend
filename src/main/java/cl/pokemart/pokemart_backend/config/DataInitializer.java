@@ -3,6 +3,7 @@ package cl.pokemart.pokemart_backend.config;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
+import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
@@ -11,6 +12,7 @@ import cl.pokemart.pokemart_backend.service.order.OrderService;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.service.user.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,6 +43,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
+    private final ProductStockBaseRepository productStockBaseRepository;
     private final OrderService orderService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -48,11 +51,13 @@ public class DataInitializer implements CommandLineRunner {
                            CategoryRepository categoryRepository,
                            ProductRepository productRepository,
                            ProductOfferRepository productOfferRepository,
+                           ProductStockBaseRepository productStockBaseRepository,
                            OrderService orderService) {
         this.userService = userService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
+        this.productStockBaseRepository = productStockBaseRepository;
         this.orderService = orderService;
     }
 
@@ -273,7 +278,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Product ensureProduct(String name, String description, Category category, User seller, String imageUrl, BigDecimal price, int stock) {
-        return productRepository.findAll().stream()
+        Product product = productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst()
                 .orElseGet(() -> productRepository.save(Product.builder()
@@ -286,6 +291,12 @@ public class DataInitializer implements CommandLineRunner {
                         .stock(stock)
                         .active(true)
                         .build()));
+        productStockBaseRepository.findByProduct(product)
+                .orElseGet(() -> productStockBaseRepository.save(ProductStockBase.builder()
+                        .product(product)
+                        .stockBase(stock)
+                        .build()));
+        return product;
     }
 
     private void ensureOffer(Product product, int discountPct, LocalDateTime endsAt) {

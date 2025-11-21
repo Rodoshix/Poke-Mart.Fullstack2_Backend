@@ -5,11 +5,13 @@ import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
+import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,15 +31,18 @@ public class CatalogService {
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
     private final UserRepository userRepository;
+    private final ProductStockBaseRepository productStockBaseRepository;
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
                           ProductOfferRepository productOfferRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          ProductStockBaseRepository productStockBaseRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
         this.userRepository = userRepository;
+        this.productStockBaseRepository = productStockBaseRepository;
     }
 
     // Public
@@ -86,6 +91,7 @@ public class CatalogService {
                 .build();
 
         Product saved = productRepository.save(product);
+        ensureStockBase(saved, request.getStockBase());
         return mapToResponse(saved, Optional.empty());
     }
 
@@ -101,6 +107,9 @@ public class CatalogService {
         product.setStock(request.getStock());
         product.setImageUrl(request.getImagenUrl());
         product.setCategory(category);
+        if (request.getStockBase() != null) {
+            ensureStockBase(product, request.getStockBase());
+        }
 
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
     }
@@ -174,16 +183,28 @@ public class CatalogService {
                     .endsAt(o.getEndsAt() != null ? o.getEndsAt().toString() : null)
                     .build();
         }
+        Integer stockBase = productStockBaseRepository.findByProductId(product.getId())
+                .map(ProductStockBase::getStockBase)
+                .orElse(null);
         return ProductResponse.builder()
                 .id(product.getId())
                 .nombre(product.getName())
                 .descripcion(product.getDescription())
                 .precio(product.getPrice())
                 .stock(product.getStock())
+                .stockBase(stockBase)
                 .imagenUrl(product.getImageUrl())
                 .categoria(product.getCategory() != null ? product.getCategory().getName() : null)
                 .offer(offerInfo)
                 .vendedor(product.getSeller() != null ? product.getSeller().getUsername() : null)
                 .build();
+    }
+
+    private void ensureStockBase(Product product, Integer stockBaseValue) {
+        int base = stockBaseValue != null ? stockBaseValue : (product.getStock() != null ? product.getStock() : 0);
+        ProductStockBase stockBase = productStockBaseRepository.findByProduct(product)
+                .orElseGet(() -> ProductStockBase.builder().product(product).build());
+        stockBase.setStockBase(base);
+        productStockBaseRepository.save(stockBase);
     }
 }
