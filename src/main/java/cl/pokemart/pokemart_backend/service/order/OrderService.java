@@ -70,7 +70,7 @@ public class OrderService {
                 .toList();
 
         BigDecimal subtotal = items.stream()
-                .map(OrderItem::getLineTotal)
+                .map(OrderItem::getTotalLinea)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setItems(items);
