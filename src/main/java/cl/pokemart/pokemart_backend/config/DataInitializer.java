@@ -5,6 +5,8 @@ import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
+import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
+import cl.pokemart.pokemart_backend.dto.order.OrderRequest;
 import cl.pokemart.pokemart_backend.service.order.OrderService;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
@@ -106,39 +108,56 @@ public class DataInitializer implements CommandLineRunner {
     private void seedOrdersDemo() {
         try {
             List<Product> products = productRepository.findAllActive();
-            if (products.isEmpty()) return;
+            if (products.isEmpty()) {
+                log.warn("No se sembraron ordenes demo porque no hay productos activos cargados");
+                return;
+            }
 
             // pick first cliente
-            Optional<User> anyClient = userService.findAll().stream().filter(u -> u.getRole() == Role.CLIENTE).findFirst();
-            User customer = anyClient.orElse(null);
+            List<User> allUsers = userService.findAll();
+            Optional<User> anyClient = allUsers.stream().filter(u -> u.getRole() == Role.CLIENTE).findFirst();
+            User customer = anyClient.orElse(allUsers.stream().filter(u -> u.getRole() == Role.VENDEDOR || u.getRole() == Role.ADMIN).findFirst().orElse(null));
 
-            List<Map<String, Object>> items = new java.util.ArrayList<>();
-            items.add(new java.util.HashMap<>(Map.of("productoId", products.get(0).getId(), "cantidad", 1)));
-            if (products.size() > 1) {
-                items.add(new java.util.HashMap<>(Map.of("productoId", products.get(1).getId(), "cantidad", 2)));
-            }
-
-            Map<String, Object> request = new java.util.HashMap<>();
-            request.put("nombre", customer != null && customer.getProfile() != null ? customer.getProfile().getNombre() : "Cliente");
-            request.put("apellido", customer != null && customer.getProfile() != null ? customer.getProfile().getApellido() : "Pokemart");
-            request.put("correo", customer != null ? customer.getEmail() : "cliente@pokemart.cl");
-            request.put("telefono", customer != null && customer.getProfile() != null ? customer.getProfile().getTelefono() : "+56900000000");
-            request.put("region", "Kanto");
-            request.put("comuna", "Ciudad Central");
-            request.put("calle", "Calle Principal 123");
-            request.put("departamento", "Depto 101");
-            request.put("notas", "Entrega en horario laboral");
-            request.put("metodoPago", "credit");
-            request.put("items", items);
-
-            // simple idempotency: only create if empty
-            if (orderService.listForAdmin().isEmpty()) {
-                var orderRequest = objectMapper.convertValue(request, cl.pokemart.pokemart_backend.dto.order.OrderRequest.class);
-                orderService.createOrder(orderRequest, customer);
+            int existing = orderService.listForAdmin().size();
+            if (existing == 0) {
+                log.info("Sembrando ordenes demo (productos: {}, usuarios: {})", products.size(), allUsers.size());
+                createOrderDemo(customer, products, "Cliente", "Demo", "cliente@pokemart.cl", "+56900000000", "Kanto", "Ciudad Central", "Calle Principal 123", "Depto 101", 1, 2);
+                createOrderDemo(customer, products, "Ash", "Ketchum", "ash@pokemart.cl", "+56912345678", "Kanto", "Pueblo Paleta", "Camino 1", "Casa 2", 2, 1);
+                createOrderDemo(customer, products, "Misty", "Waterflower", "misty@pokemart.cl", "+56987654321", "Kanto", "Ciudad Celeste", "Av. Lago 89", "Depto 901", 1, 1);
+            } else {
+                log.info("No se sembraron ordenes demo (ya existen {} ordenes)", existing);
             }
         } catch (Exception e) {
-            log.warn("No se pudieron sembrar ordenes demo: {}", e.getMessage());
+            log.warn("No se pudieron sembrar ordenes demo", e);
         }
+    }
+
+    private void createOrderDemo(User customer, List<Product> products, String nombre, String apellido, String correo, String telefono, String region, String comuna, String calle, String departamento, int... cantidades) {
+        if (products.isEmpty()) return;
+        List<OrderItemRequest> items = new java.util.ArrayList<>();
+        for (int i = 0; i < products.size() && i < cantidades.length; i++) {
+            int qty = Math.max(1, cantidades[i]);
+            items.add(new OrderItemRequest(products.get(i).getId(), qty));
+        }
+        if (items.isEmpty()) {
+            items.add(new OrderItemRequest(products.get(0).getId(), 1));
+        }
+
+        OrderRequest orderRequest = new OrderRequest(
+                nombre,
+                apellido,
+                correo,
+                telefono,
+                region,
+                comuna,
+                calle,
+                departamento,
+                "Orden demo generada por DataInitializer",
+                "credit",
+                items
+        );
+        orderService.createOrder(orderRequest, customer);
+        log.info("Orden demo creada para {} {} con {} items", nombre, apellido, items.size());
     }
 
     private void seedUsersFromJson(Path jsonPath) {

@@ -55,7 +55,7 @@ public class OrderService {
                 .direccionEnvio(joinAddress(request.getCalle(), request.getDepartamento()))
                 .regionEnvio(request.getRegion())
                 .comunaEnvio(request.getComuna())
-                .referenciaEnvio(request.getNotas())
+                .referenciaEnvio(valueOrDefault(request.getNotas(), "Sin referencias"))
                 .metodoPago(request.getMetodoPago())
                 .estado(OrderStatus.CREADA)
                 .subtotal(BigDecimal.ZERO)
@@ -63,11 +63,12 @@ public class OrderService {
                 .descuento(BigDecimal.ZERO)
                 .impuestos(BigDecimal.ZERO)
                 .total(BigDecimal.ZERO)
+                .notas(valueOrDefault(request.getNotas(), "Sin notas registradas"))
                 .build();
 
-        List<OrderItem> items = request.getItems().stream()
+        List<OrderItem> items = new java.util.ArrayList<>(request.getItems().stream()
                 .map(itemReq -> toOrderItem(order, itemReq))
-                .toList();
+                .toList());
 
         BigDecimal subtotal = items.stream()
                 .map(OrderItem::getTotalLinea)
@@ -157,5 +158,9 @@ public class OrderService {
     private String joinAddress(String calle, String depto) {
         if (depto == null || depto.isBlank()) return calle;
         return calle + ", " + depto;
+    }
+
+    private String valueOrDefault(String value, String fallback) {
+        return (value != null && !value.isBlank()) ? value : fallback;
     }
 }
