@@ -5,10 +5,12 @@ import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.model.user.UserProfile;
 import cl.pokemart.pokemart_backend.repository.user.UserProfileRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.Assert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -137,6 +139,83 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public java.util.List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    }
+
+    public User setActive(Long id, boolean active) {
+        User user = findById(id);
+        user.setActive(active);
+        return userRepository.save(user);
+    }
+
+    public User updateUser(Long id,
+                           String email,
+                           String username,
+                           String rawPassword,
+                           String firstName,
+                            String lastName,
+                           String rut,
+                           String direccion,
+                           String region,
+                           String comuna,
+                           LocalDate fechaNacimiento,
+                           String telefono,
+                           Role role,
+                           Boolean active,
+                           String avatarUrl) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        String normalizedEmail = email != null ? normalize(email) : user.getEmail();
+        String normalizedUsername = username != null ? username.trim() : user.getUsername();
+
+        if (!StringUtils.hasText(normalizedEmail)) {
+            throw new IllegalArgumentException("Email requerido");
+        }
+        if (!StringUtils.hasText(normalizedUsername)) {
+            throw new IllegalArgumentException("Username requerido");
+        }
+        userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> { throw new IllegalArgumentException("Email ya registrado"); });
+        userRepository.findByUsernameIgnoreCase(normalizedUsername)
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> { throw new IllegalArgumentException("Username ya registrado"); });
+
+        user.setEmail(normalizedEmail);
+        user.setUsername(normalizedUsername);
+        if (StringUtils.hasText(rawPassword)) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+        }
+        if (role != null) {
+            user.setRole(role);
+        }
+        if (active != null) {
+            user.setActive(active);
+        }
+        user.setAvatarUrl(avatarUrl);
+
+        UserProfile profile = user.getProfile() != null ? user.getProfile() : new UserProfile();
+        profile.setUser(user);
+
+        if (rut != null && userProfileRepository.findByRut(rut.trim()).filter(p -> !p.getUser().getId().equals(id)).isPresent()) {
+            throw new IllegalArgumentException("RUT ya registrado");
+        }
+
+        if (firstName != null) profile.setNombre(firstName);
+        if (lastName != null) profile.setApellido(lastName);
+        if (rut != null) profile.setRut(rut.trim());
+        if (direccion != null) profile.setDireccion(direccion);
+        if (region != null) profile.setRegion(region);
+        if (comuna != null) profile.setComuna(comuna);
+        if (fechaNacimiento != null) profile.setFechaNacimiento(fechaNacimiento);
+        if (telefono != null) profile.setTelefono(telefono);
+
+        user.setProfile(profile);
+        return userRepository.save(user);
     }
 
     private String normalize(String value) {
