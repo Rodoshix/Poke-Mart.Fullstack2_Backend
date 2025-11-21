@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +34,11 @@ public class RestExceptionHandler {
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .orElse("Datos invalidos");
         return build(HttpStatus.BAD_REQUEST, msg);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleUploadLimit(MaxUploadSizeExceededException ex) {
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, "El archivo supera el limite permitido");
     }
 
     private ResponseEntity<Map<String, Object>> build(HttpStatus status, String message) {
