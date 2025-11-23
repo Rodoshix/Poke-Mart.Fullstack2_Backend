@@ -2,6 +2,8 @@ package cl.pokemart.pokemart_backend.service.catalog;
 
 import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
+import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
@@ -23,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.time.format.DateTimeParseException;
 
 @Service
 @Transactional
@@ -59,6 +62,25 @@ public class CatalogService {
         return products.stream()
                 .map(p -> mapToResponse(p, findOfferForProduct(p, offers)))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
+        ensureManager(current);
+        List<ProductOffer> offers = includeInactive ? productOfferRepository.findAll() : productOfferRepository.findActive(LocalDateTime.now());
+        return offers.stream()
+                .filter(o -> isOfferVisibleForUser(o, current))
+                .map(AdminOfferResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminOfferResponse getOfferForManagement(Long id, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        enforceOfferOwnership(offer, current);
+        return AdminOfferResponse.from(offer);
     }
 
     @Transactional(readOnly = true)
@@ -196,6 +218,63 @@ public class CatalogService {
         return mapToResponse(product, Optional.of(offer));
     }
 
+    public AdminOfferResponse createOffer(AdminOfferRequest request, User current) {
+        ensureManager(current);
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        enforceOwnership(product, current);
+        validateDiscount(request.getDiscountPct());
+        ProductOffer offer = ProductOffer.builder()
+                .product(product)
+                .discountPct(request.getDiscountPct())
+                .endsAt(parseDateTime(request.getEndsAt()))
+                .active(request.getActive() == null ? true : request.getActive())
+                .build();
+        ProductOffer saved = productOfferRepository.save(offer);
+        return AdminOfferResponse.from(saved);
+    }
+
+    public AdminOfferResponse updateOffer(Long id, AdminOfferRequest request, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        enforceOfferOwnership(offer, current);
+        if (request.getProductId() != null && !request.getProductId().equals(offer.getProduct().getId())) {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+            enforceOwnership(product, current);
+            offer.setProduct(product);
+        }
+        validateDiscount(request.getDiscountPct());
+        offer.setDiscountPct(request.getDiscountPct());
+        offer.setEndsAt(parseDateTime(request.getEndsAt()));
+        if (request.getActive() != null) {
+            offer.setActive(request.getActive());
+        }
+        return AdminOfferResponse.from(offer);
+    }
+
+    public AdminOfferResponse setOfferActive(Long id, boolean active, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        enforceOfferOwnership(offer, current);
+        offer.setActive(active);
+        return AdminOfferResponse.from(offer);
+    }
+
+    public void deleteOffer(Long id, boolean hard, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        enforceOfferOwnership(offer, current);
+        if (hard) {
+            productOfferRepository.delete(offer);
+        } else {
+            offer.setActive(false);
+        }
+    }
+
     // Helpers
     private void enforceOwnership(Product product, User current) {
         if (current == null) {
@@ -230,6 +309,39 @@ public class CatalogService {
     private void ensureManager(User current) {
         if (current == null || (current.getRole() != Role.ADMIN && current.getRole() != Role.VENDEDOR)) {
             throw new SecurityException("No autorizado");
+        }
+    }
+
+    private void enforceOfferOwnership(ProductOffer offer, User current) {
+        if (current == null) {
+            throw new SecurityException("No autenticado");
+        }
+        if (current.getRole() == Role.ADMIN) return;
+        var product = offer.getProduct();
+        if (product == null || product.getSeller() == null || !product.getSeller().getId().equals(current.getId())) {
+            throw new SecurityException("No autorizado");
+        }
+    }
+
+    private boolean isOfferVisibleForUser(ProductOffer offer, User current) {
+        if (current == null) return false;
+        if (current.getRole() == Role.ADMIN) return true;
+        var product = offer.getProduct();
+        return product != null && product.getSeller() != null && product.getSeller().getId().equals(current.getId());
+    }
+
+    private void validateDiscount(Integer discount) {
+        if (discount == null || discount <= 0 || discount >= 100) {
+            throw new IllegalArgumentException("Descuento invalido");
+        }
+    }
+
+    private LocalDateTime parseDateTime(String value) {
+        if (!StringUtils.hasText(value)) return null;
+        try {
+            return LocalDateTime.parse(value.trim());
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Formato de fecha invalido (usar ISO-8601)");
         }
     }
 
