@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +41,19 @@ public class ProductController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @GetMapping("/manage")
+    public List<ProductResponse> listForManagement(@RequestParam(value = "includeInactive", defaultValue = "true") boolean includeInactive,
+                                                   Authentication auth) {
+        return catalogService.listProductsForManagement(includeInactive, currentUser(auth));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @GetMapping("/manage/{id}")
+    public ProductResponse getOneForManagement(@PathVariable Long id, Authentication auth) {
+        return catalogService.getProductForManagement(id, currentUser(auth));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
     @PostMapping
     public ProductResponse create(@Valid @RequestBody ProductRequest request, Authentication auth) {
         return catalogService.createProduct(request, currentUser(auth));
@@ -52,9 +66,17 @@ public class ProductController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @PatchMapping("/{id}/status")
+    public ProductResponse updateStatus(@PathVariable Long id, @RequestParam("active") boolean active, Authentication auth) {
+        return catalogService.setProductActive(id, active, currentUser(auth));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id, Authentication auth) {
-        catalogService.deleteProduct(id, currentUser(auth));
+    public void delete(@PathVariable Long id,
+                       @RequestParam(value = "hard", defaultValue = "false") boolean hardDelete,
+                       Authentication auth) {
+        catalogService.deleteProduct(id, currentUser(auth), hardDelete);
     }
 
     private User currentUser(Authentication auth) {

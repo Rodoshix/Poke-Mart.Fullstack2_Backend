@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface ProductStockBaseRepository extends JpaRepository<ProductStockBase, Long> {
     Optional<ProductStockBase> findByProduct(Product product);
     Optional<ProductStockBase> findByProductId(Long productId);
+    void deleteByProduct(Product product);
 }

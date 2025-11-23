@@ -1,6 +1,7 @@
 package cl.pokemart.pokemart_backend.repository.order;
 
 import cl.pokemart.pokemart_backend.model.order.Order;
+import cl.pokemart.pokemart_backend.model.user.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findWithItemsById(Long id);
 
     Optional<Order> findTopByOrderByIdDesc();
+
+    List<Order> findByCliente(User cliente);
 }

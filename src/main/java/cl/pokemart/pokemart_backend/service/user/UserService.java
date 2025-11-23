@@ -3,6 +3,8 @@ package cl.pokemart.pokemart_backend.service.user;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.model.user.UserProfile;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
+import cl.pokemart.pokemart_backend.repository.order.OrderRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserProfileRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.Assert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,11 +25,19 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
-    public UserService(UserRepository userRepository, UserProfileRepository userProfileRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       UserProfileRepository userProfileRepository,
+                       PasswordEncoder passwordEncoder,
+                       ProductRepository productRepository,
+                       OrderRepository orderRepository) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
+        this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -150,6 +159,31 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         user.setActive(active);
         return userRepository.save(user);
+    }
+
+    public void deleteUser(Long id, boolean hardDelete) {
+        if (!hardDelete) {
+            setActive(id, false);
+            return;
+        }
+        User user = findById(id);
+        if (user.getRole() == Role.ADMIN) {
+            throw new AccessDeniedException("No se puede eliminar un administrador activo");
+        }
+
+        var products = productRepository.findBySeller(user);
+        if (products != null && !products.isEmpty()) {
+            products.forEach(p -> p.setSeller(null));
+            productRepository.saveAll(products);
+        }
+
+        var orders = orderRepository.findByCliente(user);
+        if (orders != null && !orders.isEmpty()) {
+            orders.forEach(o -> o.setCliente(null));
+            orderRepository.saveAll(orders);
+        }
+
+        userRepository.delete(user);
     }
 
     public User updateUser(Long id,

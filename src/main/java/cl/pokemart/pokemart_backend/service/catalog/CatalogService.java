@@ -12,6 +12,7 @@ import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
+import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -32,17 +33,20 @@ public class CatalogService {
     private final ProductOfferRepository productOfferRepository;
     private final UserRepository userRepository;
     private final ProductStockBaseRepository productStockBaseRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
                           ProductOfferRepository productOfferRepository,
                           UserRepository userRepository,
-                          ProductStockBaseRepository productStockBaseRepository) {
+                          ProductStockBaseRepository productStockBaseRepository,
+                          OrderItemRepository orderItemRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
         this.userRepository = userRepository;
         this.productStockBaseRepository = productStockBaseRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     // Public
@@ -70,6 +74,36 @@ public class CatalogService {
     public ProductResponse getProduct(Long id) {
         Product product = productRepository.findActiveById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        var offers = productOfferRepository.findActive(LocalDateTime.now());
+        return mapToResponse(product, findOfferForProduct(product, offers));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> listProductsForManagement(boolean includeInactive, User current) {
+        ensureManager(current);
+        List<Product> products;
+        if (current.getRole() == Role.VENDEDOR) {
+            products = productRepository.findBySeller(current);
+            if (!includeInactive) {
+                products = products.stream()
+                        .filter(p -> Boolean.TRUE.equals(p.getActive()))
+                        .toList();
+            }
+        } else {
+            products = includeInactive ? productRepository.findAll() : productRepository.findAllActive();
+        }
+        var offers = productOfferRepository.findActive(LocalDateTime.now());
+        return products.stream()
+                .map(p -> mapToResponse(p, findOfferForProduct(p, offers)))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProductForManagement(Long id, User current) {
+        ensureManager(current);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        enforceOwnership(product, current);
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return mapToResponse(product, findOfferForProduct(product, offers));
     }
@@ -114,11 +148,35 @@ public class CatalogService {
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
     }
 
-    public void deleteProduct(Long id, User current) {
+    public ProductResponse setProductActive(Long id, boolean active, User current) {
+        ensureManager(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         enforceOwnership(product, current);
-        product.setActive(false);
+        product.setActive(active);
+        return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
+    }
+
+    public void deleteProduct(Long id, User current, boolean hardDelete) {
+        ensureManager(current);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        enforceOwnership(product, current);
+        if (!hardDelete) {
+            product.setActive(false);
+            return;
+        }
+        var offers = productOfferRepository.findByProduct(product);
+        if (offers != null && !offers.isEmpty()) {
+            productOfferRepository.deleteAll(offers);
+        }
+        productStockBaseRepository.deleteByProduct(product);
+        var orderItems = orderItemRepository.findByProducto(product);
+        if (orderItems != null && !orderItems.isEmpty()) {
+            orderItems.forEach(item -> item.setProducto(null));
+            orderItemRepository.saveAll(orderItems);
+        }
+        productRepository.delete(product);
     }
 
     public ProductResponse addOffer(Long productId, Integer discountPct, LocalDateTime endsAt, User current) {
@@ -169,6 +227,12 @@ public class CatalogService {
         throw new SecurityException("No autorizado");
     }
 
+    private void ensureManager(User current) {
+        if (current == null || (current.getRole() != Role.ADMIN && current.getRole() != Role.VENDEDOR)) {
+            throw new SecurityException("No autorizado");
+        }
+    }
+
     private Optional<ProductOffer> findOfferForProduct(Product product, List<ProductOffer> offers) {
         if (offers == null) return Optional.empty();
         return offers.stream().filter(o -> o.getProduct().getId().equals(product.getId()) && !o.isExpired()).findFirst();
@@ -197,6 +261,7 @@ public class CatalogService {
                 .categoria(product.getCategory() != null ? product.getCategory().getName() : null)
                 .offer(offerInfo)
                 .vendedor(product.getSeller() != null ? product.getSeller().getUsername() : null)
+                .active(product.getActive())
                 .build();
     }
 

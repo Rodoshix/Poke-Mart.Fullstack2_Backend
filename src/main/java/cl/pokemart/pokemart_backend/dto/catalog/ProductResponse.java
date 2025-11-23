@@ -18,6 +18,7 @@ public class ProductResponse {
     String categoria;
     OfferInfo offer;
     String vendedor;
+    Boolean active;
 
     @Value
     @Builder

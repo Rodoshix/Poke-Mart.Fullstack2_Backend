@@ -105,8 +105,8 @@ public class AdminUserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deactivate(@PathVariable Long id) {
-        userService.setActive(id, false);
+    public void delete(@PathVariable Long id, @RequestParam(value = "hard", defaultValue = "false") boolean hard) {
+        userService.deleteUser(id, hard);
     }
 
     @PatchMapping("/{id}/status")
