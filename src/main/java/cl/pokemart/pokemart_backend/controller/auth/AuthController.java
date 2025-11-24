@@ -7,6 +7,11 @@ import cl.pokemart.pokemart_backend.dto.auth.RegisterRequest;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.security.JwtService;
 import cl.pokemart.pokemart_backend.service.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth", description = "Autenticación y registro de usuarios")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -36,6 +42,9 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario y devuelve tokens JWT + perfil.")
+    @ApiResponse(responseCode = "200", description = "Inicio de sesión correcto",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class)))
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -50,6 +59,9 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Registrar usuario", description = "Crea cuenta de cliente y devuelve tokens JWT + perfil.")
+    @ApiResponse(responseCode = "200", description = "Usuario registrado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class)))
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         User user = userService.registerClient(
@@ -68,6 +80,9 @@ public class AuthController {
         return buildTokensForUser(user);
     }
 
+    @Operation(summary = "Refrescar sesión", description = "Renueva el token de acceso a partir de un refresh token válido.")
+    @ApiResponse(responseCode = "200", description = "Tokens renovados",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class)))
     @PostMapping("/refresh")
     public AuthResponse refresh(@Valid @RequestBody RefreshRequest request) {
         String refresh = request.getRefreshToken();
