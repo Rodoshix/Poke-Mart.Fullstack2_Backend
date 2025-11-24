@@ -1,6 +1,5 @@
 package cl.pokemart.pokemart_backend.model.catalog;
 
-import cl.pokemart.pokemart_backend.model.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,10 +54,6 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id")
-    private User seller;
 
     @Builder.Default
     @Column(nullable = false)

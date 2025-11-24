@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/offers")
-@PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminOfferController {
 
     private final CatalogService catalogService;

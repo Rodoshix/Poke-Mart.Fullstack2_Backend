@@ -3,7 +3,6 @@ package cl.pokemart.pokemart_backend.service.user;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.model.user.UserProfile;
-import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserProfileRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
@@ -26,18 +25,15 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
     public UserService(UserRepository userRepository,
                        UserProfileRepository userProfileRepository,
                        PasswordEncoder passwordEncoder,
-                       ProductRepository productRepository,
                        OrderRepository orderRepository) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
-        this.productRepository = productRepository;
         this.orderRepository = orderRepository;
     }
 
@@ -170,12 +166,6 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         if (user.getRole() == Role.ADMIN) {
             throw new AccessDeniedException("No se puede eliminar un administrador activo");
-        }
-
-        var products = productRepository.findBySeller(user);
-        if (products != null && !products.isEmpty()) {
-            products.forEach(p -> p.setSeller(null));
-            productRepository.saveAll(products);
         }
 
         var orders = orderRepository.findByCliente(user);

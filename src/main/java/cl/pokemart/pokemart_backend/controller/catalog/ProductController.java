@@ -53,25 +53,25 @@ public class ProductController {
         return catalogService.getProductForManagement(id, currentUser(auth));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ProductResponse create(@Valid @RequestBody ProductRequest request, Authentication auth) {
         return catalogService.createProduct(request, currentUser(auth));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request, Authentication auth) {
         return catalogService.updateProduct(id, request, currentUser(auth));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ProductResponse updateStatus(@PathVariable Long id, @RequestParam("active") boolean active, Authentication auth) {
         return catalogService.setProductActive(id, active, currentUser(auth));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id,
                        @RequestParam(value = "hard", defaultValue = "false") boolean hardDelete,

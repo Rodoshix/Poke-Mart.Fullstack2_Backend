@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.config;
+﻿package cl.pokemart.pokemart_backend.config;
 
 import cl.pokemart.pokemart_backend.dto.blog.BlogRequest;
 import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
@@ -111,13 +111,12 @@ public class DataInitializer implements CommandLineRunner {
             seedUsersFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/users.json"));
             seedCatalogFromJson(
                     relPath("../Poke-Mart.Fullstack2_React/src/data/productos.json"),
-                    relPath("../Poke-Mart.Fullstack2_React/src/data/ofertas.json"),
-                    vendor
+                    relPath("../Poke-Mart.Fullstack2_React/src/data/ofertas.json")
             );
             seedReviewsFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/reviews.json"));
             seedBlogs();
         } catch (Exception e) {
-            log.warn("Seed general falló: {}", e.getMessage());
+            log.warn("Seed general fallÃ³: {}", e.getMessage());
         }
     }
 
@@ -184,33 +183,33 @@ public class DataInitializer implements CommandLineRunner {
             }
 
             log.info("Sembrando blogs demo");
-            BlogRequest b1 = buildBlog("Guía rápida de Poké Balls para principiantes",
-                    "¿No sabes cuándo usar una Super Ball o una Ultra Ball? Repasamos los tipos de Poké Balls, sus ventajas y consejos para mejorar tu tasa de captura.",
-                    "Las Poké Balls básicas funcionan bien al inicio, pero conviene llevar siempre algunas Super Balls para encuentros sorpresivos. Recuerda usar bayas antes de lanzar y aprovechar los momentos en los que el Pokémon está menos agresivo.",
-                    "Guías",
+            BlogRequest b1 = buildBlog("GuÃ­a rÃ¡pida de PokÃ© Balls para principiantes",
+                    "Â¿No sabes cuÃ¡ndo usar una Super Ball o una Ultra Ball? Repasamos los tipos de PokÃ© Balls, sus ventajas y consejos para mejorar tu tasa de captura.",
+                    "Las PokÃ© Balls bÃ¡sicas funcionan bien al inicio, pero conviene llevar siempre algunas Super Balls para encuentros sorpresivos. Recuerda usar bayas antes de lanzar y aprovechar los momentos en los que el PokÃ©mon estÃ¡ menos agresivo.",
+                    "GuÃ­as",
                     "https://images.unsplash.com/photo-1613771404721-f93648b600b0?auto=format&fit=crop&w=800&q=80",
                     List.of("pokeballs", "consejos", "principiantes"),
                     "PUBLISHED");
 
-            BlogRequest b2 = buildBlog("Kit de expedición esencial para rutas largas",
-                    "Checklist práctica para que no te falte nada en tu próxima aventura por las rutas.",
-                    "Incluye carpa liviana, repelentes, sacos de dormir y baterías de respaldo. Ajusta el kit al clima de la región y considera peso/espacio en tu mochila.",
-                    "Expedición",
+            BlogRequest b2 = buildBlog("Kit de expediciÃ³n esencial para rutas largas",
+                    "Checklist prÃ¡ctica para que no te falte nada en tu prÃ³xima aventura por las rutas.",
+                    "Incluye carpa liviana, repelentes, sacos de dormir y baterÃ­as de respaldo. Ajusta el kit al clima de la regiÃ³n y considera peso/espacio en tu mochila.",
+                    "ExpediciÃ³n",
                     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
                     List.of("expedicion", "checklist"),
                     "PUBLISHED");
 
-            BlogRequest b3 = buildBlog("Tecnología Rotom: ventajas del Rotom Phone",
-                    "El Rotom Phone es más que un celular: mapa dinámico, Pokédex integrada y utilidades únicas.",
-                    "Ideal para entrenadores que viajan. Aprovecha la Pokédex integrada, mapas sin conexión y la compatibilidad con accesorios.",
-                    "Tecnología",
+            BlogRequest b3 = buildBlog("TecnologÃ­a Rotom: ventajas del Rotom Phone",
+                    "El Rotom Phone es mÃ¡s que un celular: mapa dinÃ¡mico, PokÃ©dex integrada y utilidades Ãºnicas.",
+                    "Ideal para entrenadores que viajan. Aprovecha la PokÃ©dex integrada, mapas sin conexiÃ³n y la compatibilidad con accesorios.",
+                    "TecnologÃ­a",
                     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
                     List.of("tecnologia", "rotom", "pokedex"),
                     "PUBLISHED");
 
-            BlogRequest b4 = buildBlog("Cómo cuidar tus zapatillas de entrenador",
-                    "Trucos sencillos para alargar la vida de tus zapatillas en climas húmedos o con mucho polvo.",
-                    "Lávalas con suavidad, sécalas a la sombra y rota pares para extender su vida útil. Usa sprays repelentes si viajas a zonas lluviosas.",
+            BlogRequest b4 = buildBlog("CÃ³mo cuidar tus zapatillas de entrenador",
+                    "Trucos sencillos para alargar la vida de tus zapatillas en climas hÃºmedos o con mucho polvo.",
+                    "LÃ¡valas con suavidad, sÃ©calas a la sombra y rota pares para extender su vida Ãºtil. Usa sprays repelentes si viajas a zonas lluviosas.",
                     "Ropa",
                     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
                     List.of("ropa", "cuidado", "consejos"),
@@ -241,7 +240,7 @@ public class DataInitializer implements CommandLineRunner {
         try {
             File file = jsonPath.toFile();
             if (!file.exists()) {
-                log.warn("No se encontró users.json en {}", jsonPath);
+                log.warn("No se encontrÃ³ users.json en {}", jsonPath);
                 return;
             }
             JsonNode root = objectMapper.readTree(file);
@@ -292,11 +291,11 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void seedCatalogFromJson(Path productsPath, Path offersPath, User seller) {
+    private void seedCatalogFromJson(Path productsPath, Path offersPath) {
         try {
             File file = productsPath.toFile();
             if (!file.exists()) {
-                log.warn("No se encontró productos.json en {}", productsPath);
+                log.warn("No se encontrÃ³ productos.json en {}", productsPath);
                 return;
             }
             List<Map<String, Object>> products = objectMapper.readValue(file, new TypeReference<>() {});
@@ -313,12 +312,12 @@ public class DataInitializer implements CommandLineRunner {
                 BigDecimal price = BigDecimal.valueOf(((Number) p.getOrDefault("precio", 0)).doubleValue());
                 int stock = ((Number) p.getOrDefault("stock", 0)).intValue();
 
-                ensureProduct(name, desc, cat, seller, image, price, stock);
+                ensureProduct(name, desc, cat, image, price, stock);
             }
 
             File offersFile = offersPath.toFile();
             if (!offersFile.exists()) {
-                log.warn("No se encontró ofertas.json en {}", offersPath);
+                log.warn("No se encontrÃ³ ofertas.json en {}", offersPath);
                 return;
             }
             List<Map<String, Object>> offers = objectMapper.readValue(offersFile, new TypeReference<>() {});
@@ -349,7 +348,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
     }
 
-    private Product ensureProduct(String name, String description, Category category, User seller, String imageUrl, BigDecimal price, int stock) {
+    private Product ensureProduct(String name, String description, Category category, String imageUrl, BigDecimal price, int stock) {
         Product product = productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst()
@@ -357,7 +356,6 @@ public class DataInitializer implements CommandLineRunner {
                         .name(name)
                         .description(description)
                         .category(category)
-                        .seller(seller)
                         .imageUrl(imageUrl)
                         .price(price)
                         .stock(stock)
@@ -388,19 +386,19 @@ public class DataInitializer implements CommandLineRunner {
         try {
             File file = reviewsPath.toFile();
             if (!file.exists()) {
-                log.warn("No se encontró reviews.json en {}", reviewsPath);
+                log.warn("No se encontrÃ³ reviews.json en {}", reviewsPath);
                 return;
             }
             Map<String, List<Map<String, Object>>> data = objectMapper.readValue(file, new TypeReference<>() {});
             if (data == null || data.isEmpty()) {
-                log.info("reviews.json vacio, no se sembraron reseñas");
+                log.info("reviews.json vacio, no se sembraron reseÃ±as");
                 return;
             }
             List<User> clients = userService.findAll().stream()
                     .filter(u -> u.getRole() == Role.CLIENTE)
                     .toList();
             if (clients.isEmpty()) {
-                log.warn("No hay clientes para asociar reseñas; se omite seed de reviews");
+                log.warn("No hay clientes para asociar reseÃ±as; se omite seed de reviews");
                 return;
             }
             int clientIndex = 0;
@@ -438,7 +436,7 @@ public class DataInitializer implements CommandLineRunner {
             }
             log.info("Seeded reviews desde reviews.json");
         } catch (Exception e) {
-            log.warn("Error sembrando reseñas: {}", e.getMessage());
+            log.warn("Error sembrando reseÃ±as: {}", e.getMessage());
         }
     }
 
@@ -453,3 +451,10 @@ public class DataInitializer implements CommandLineRunner {
         return noAccent.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
     }
 }
+
+
+
+
+
+
+

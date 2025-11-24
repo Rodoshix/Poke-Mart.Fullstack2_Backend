@@ -20,7 +20,6 @@ import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
-import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +38,6 @@ public class CatalogService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
-    private final UserRepository userRepository;
     private final ProductStockBaseRepository productStockBaseRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductReviewRepository productReviewRepository;
@@ -47,14 +45,12 @@ public class CatalogService {
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
                           ProductOfferRepository productOfferRepository,
-                          UserRepository userRepository,
                           ProductStockBaseRepository productStockBaseRepository,
                           OrderItemRepository orderItemRepository,
                           ProductReviewRepository productReviewRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
-        this.userRepository = userRepository;
         this.productStockBaseRepository = productStockBaseRepository;
         this.orderItemRepository = orderItemRepository;
         this.productReviewRepository = productReviewRepository;
@@ -142,17 +138,7 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public List<ProductResponse> listProductsForManagement(boolean includeInactive, User current) {
         ensureManager(current);
-        List<Product> products;
-        if (current.getRole() == Role.VENDEDOR) {
-            products = productRepository.findBySeller(current);
-            if (!includeInactive) {
-                products = products.stream()
-                        .filter(p -> Boolean.TRUE.equals(p.getActive()))
-                        .toList();
-            }
-        } else {
-            products = includeInactive ? productRepository.findAll() : productRepository.findAllActive();
-        }
+        List<Product> products = includeInactive ? productRepository.findAll() : productRepository.findAllActive();
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return products.stream()
                 .map(p -> mapToResponse(p, findOfferForProduct(p, offers)))
@@ -164,15 +150,14 @@ public class CatalogService {
         ensureManager(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return mapToResponse(product, findOfferForProduct(product, offers));
     }
 
     // Admin/Vendedor
     public ProductResponse createProduct(ProductRequest request, User current) {
+        ensureAdmin(current);
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
-        User seller = resolveSellerForCreation(current);
 
         Product product = Product.builder()
                 .name(request.getNombre())
@@ -181,7 +166,6 @@ public class CatalogService {
                 .stock(request.getStock() != null ? request.getStock() : 0)
                 .imageUrl(request.getImagenUrl())
                 .category(category)
-                .seller(seller)
                 .active(true)
                 .build();
 
@@ -191,9 +175,9 @@ public class CatalogService {
     }
 
     public ProductResponse updateProduct(Long id, ProductRequest request, User current) {
+        ensureAdmin(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
 
         product.setName(request.getNombre());
@@ -213,16 +197,14 @@ public class CatalogService {
         ensureManager(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         product.setActive(active);
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
     }
 
     public void deleteProduct(Long id, User current, boolean hardDelete) {
-        ensureManager(current);
+        ensureAdmin(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         if (!hardDelete) {
             product.setActive(false);
             return;
@@ -241,9 +223,9 @@ public class CatalogService {
     }
 
     public ProductResponse addOffer(Long productId, Integer discountPct, LocalDateTime endsAt, User current) {
+        ensureAdmin(current);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         if (discountPct == null || discountPct <= 0 || discountPct >= 100) {
             throw new IllegalArgumentException("Descuento invalido");
         }
@@ -258,10 +240,9 @@ public class CatalogService {
     }
 
     public AdminOfferResponse createOffer(AdminOfferRequest request, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        enforceOwnership(product, current);
         validateDiscount(request.getDiscountPct());
         ProductOffer offer = ProductOffer.builder()
                 .product(product)
@@ -274,14 +255,12 @@ public class CatalogService {
     }
 
     public AdminOfferResponse updateOffer(Long id, AdminOfferRequest request, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        enforceOfferOwnership(offer, current);
         if (request.getProductId() != null && !request.getProductId().equals(offer.getProduct().getId())) {
             Product product = productRepository.findById(request.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-            enforceOwnership(product, current);
             offer.setProduct(product);
         }
         validateDiscount(request.getDiscountPct());
@@ -294,19 +273,17 @@ public class CatalogService {
     }
 
     public AdminOfferResponse setOfferActive(Long id, boolean active, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        enforceOfferOwnership(offer, current);
         offer.setActive(active);
         return AdminOfferResponse.from(offer);
     }
 
     public void deleteOffer(Long id, boolean hard, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        enforceOfferOwnership(offer, current);
         if (hard) {
             productOfferRepository.delete(offer);
         } else {
@@ -321,16 +298,6 @@ public class CatalogService {
     }
 
     // Helpers
-    private void enforceOwnership(Product product, User current) {
-        if (current == null) {
-            throw new SecurityException("No autenticado");
-        }
-        if (current.getRole() == Role.ADMIN) return;
-        if (product.getSeller() == null || !product.getSeller().getId().equals(current.getId())) {
-            throw new SecurityException("No autorizado");
-        }
-    }
-
     private Category resolveCategory(String slug, String nameFallback) {
         if (!StringUtils.hasText(slug)) {
             throw new IllegalArgumentException("Categoria requerida");
@@ -342,37 +309,20 @@ public class CatalogService {
                         .build()));
     }
 
-    private User resolveSellerForCreation(User current) {
-        if (current == null) throw new SecurityException("No autenticado");
-        if (current.getRole() == Role.ADMIN || current.getRole() == Role.VENDEDOR) {
-            return userRepository.findById(current.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
-        }
-        throw new SecurityException("No autorizado");
-    }
-
     private void ensureManager(User current) {
         if (current == null || (current.getRole() != Role.ADMIN && current.getRole() != Role.VENDEDOR)) {
             throw new SecurityException("No autorizado");
         }
     }
 
-    private void enforceOfferOwnership(ProductOffer offer, User current) {
-        if (current == null) {
-            throw new SecurityException("No autenticado");
-        }
-        if (current.getRole() == Role.ADMIN) return;
-        var product = offer.getProduct();
-        if (product == null || product.getSeller() == null || !product.getSeller().getId().equals(current.getId())) {
+    private void ensureAdmin(User current) {
+        if (current == null || current.getRole() != Role.ADMIN) {
             throw new SecurityException("No autorizado");
         }
     }
 
     private boolean isOfferVisibleForUser(ProductOffer offer, User current) {
-        if (current == null) return false;
-        if (current.getRole() == Role.ADMIN) return true;
-        var product = offer.getProduct();
-        return product != null && product.getSeller() != null && product.getSeller().getId().equals(current.getId());
+        return current != null && current.getRole() == Role.ADMIN;
     }
 
     private void validateDiscount(Integer discount) {
@@ -419,7 +369,7 @@ public class CatalogService {
                 .imagenUrl(product.getImageUrl())
                 .categoria(product.getCategory() != null ? product.getCategory().getName() : null)
                 .offer(offerInfo)
-                .vendedor(product.getSeller() != null ? product.getSeller().getUsername() : null)
+                .vendedor(null)
                 .reviewCount((int) reviewCount)
                 .reviewAvg(reviewAvg)
                 .active(product.getActive())
