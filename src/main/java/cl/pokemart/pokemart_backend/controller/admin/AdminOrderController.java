@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/orders")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
 public class AdminOrderController {
 
     private final OrderService orderService;
@@ -35,6 +35,7 @@ public class AdminOrderController {
         return orderService.getForAdmin(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public OrderResponse update(@PathVariable Long id, @Valid @RequestBody AdminOrderUpdateRequest request) {
         return orderService.updateOrderAdmin(id, request.getEstado(), request.getNotas(), request.getReferenciaEnvio());

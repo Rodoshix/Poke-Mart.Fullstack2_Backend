@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/offers")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
 public class AdminOfferController {
 
     private final CatalogService catalogService;
@@ -41,21 +41,25 @@ public class AdminOfferController {
         return catalogService.getOfferForManagement(id, currentUser(auth));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public AdminOfferResponse create(@Valid @RequestBody AdminOfferRequest request, Authentication auth) {
         return catalogService.createOffer(request, currentUser(auth));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public AdminOfferResponse update(@PathVariable Long id, @Valid @RequestBody AdminOfferRequest request, Authentication auth) {
         return catalogService.updateOffer(id, request, currentUser(auth));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/status")
     public AdminOfferResponse updateStatus(@PathVariable Long id, @RequestParam("active") boolean active, Authentication auth) {
         return catalogService.setOfferActive(id, active, currentUser(auth));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, @RequestParam(value = "hard", defaultValue = "false") boolean hard, Authentication auth) {
         catalogService.deleteOffer(id, hard, currentUser(auth));
