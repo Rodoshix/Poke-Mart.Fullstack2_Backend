@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.math.BigDecimal.ZERO;
+
 @Service
 @Transactional
 public class OrderService {
@@ -48,6 +50,8 @@ public class OrderService {
             throw new IllegalArgumentException("La orden debe tener al menos un producto");
         }
 
+        BigDecimal costoEnvio = request.getCostoEnvio() != null ? request.getCostoEnvio() : BigDecimal.ZERO;
+
         Order order = Order.builder()
                 .cliente(resolveCustomer(request, currentUser))
                 .nombreCliente((request.getNombre() + " " + request.getApellido()).trim())
@@ -59,11 +63,11 @@ public class OrderService {
                 .referenciaEnvio(valueOrDefault(request.getNotas(), "Sin referencias"))
                 .metodoPago(request.getMetodoPago())
                 .estado(OrderStatus.CREADA)
-                .subtotal(BigDecimal.ZERO)
-                .costoEnvio(BigDecimal.ZERO)
-                .descuento(BigDecimal.ZERO)
-                .impuestos(BigDecimal.ZERO)
-                .total(BigDecimal.ZERO)
+                .subtotal(ZERO)
+                .costoEnvio(costoEnvio)
+                .descuento(ZERO)
+                .impuestos(ZERO)
+                .total(ZERO)
                 .notas(valueOrDefault(request.getNotas(), "Sin notas registradas"))
                 .build();
 
@@ -73,14 +77,18 @@ public class OrderService {
 
         BigDecimal subtotal = items.stream()
                 .map(OrderItem::getTotalLinea)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(ZERO, BigDecimal::add);
+
+        BigDecimal descuento = calculateDiscount(items);
+        BigDecimal total = subtotal.add(costoEnvio);
+        BigDecimal impuestos = calculateTax(total);
 
         order.setItems(items);
         order.setSubtotal(subtotal);
-        order.setCostoEnvio(BigDecimal.ZERO);
-        order.setDescuento(BigDecimal.ZERO);
-        order.setImpuestos(BigDecimal.ZERO);
-        order.setTotal(subtotal);
+        order.setCostoEnvio(costoEnvio);
+        order.setDescuento(descuento);
+        order.setImpuestos(impuestos);
+        order.setTotal(total);
 
         Order saved = orderRepository.save(order);
         saved.setNumeroOrden(generateOrderNumber(saved.getId()));
@@ -185,5 +193,29 @@ public class OrderService {
 
     private String valueOrDefault(String value, String fallback) {
         return (value != null && !value.isBlank()) ? value : fallback;
+    }
+
+    private BigDecimal calculateDiscount(List<OrderItem> items) {
+        BigDecimal discount = ZERO;
+        for (OrderItem item : items) {
+            if (item.getProducto() == null || item.getProducto().getPrice() == null || item.getPrecioUnitario() == null) {
+                continue;
+            }
+            BigDecimal base = item.getProducto().getPrice();
+            BigDecimal unit = item.getPrecioUnitario();
+            if (base.compareTo(unit) > 0) {
+                BigDecimal diff = base.subtract(unit).multiply(BigDecimal.valueOf(item.getCantidad()));
+                discount = discount.add(diff);
+            }
+        }
+        return discount.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculateTax(BigDecimal total) {
+        if (total == null) return ZERO;
+        BigDecimal divisor = BigDecimal.valueOf(1.19);
+        BigDecimal net = total.divide(divisor, 4, RoundingMode.HALF_UP);
+        BigDecimal tax = total.subtract(net);
+        return tax.setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -43,6 +43,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword())
             );
             User user = (User) authentication.getPrincipal();
+            userService.touchLastLogin(user.getId());
             return buildTokensForUser(user);
         } catch (BadCredentialsException ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales invalidas");
@@ -79,6 +80,7 @@ public class AuthController {
         }
         String username = jwtService.extractUsername(refresh);
         User user = userService.findByIdentifier(username);
+        userService.touchLastLogin(user.getId());
         return buildTokensForUser(user);
     }
 

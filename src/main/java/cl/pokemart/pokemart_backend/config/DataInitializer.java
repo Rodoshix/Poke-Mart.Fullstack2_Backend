@@ -169,6 +169,7 @@ public class DataInitializer implements CommandLineRunner {
                 departamento,
                 "Orden demo generada por DataInitializer",
                 "credit",
+                java.math.BigDecimal.ZERO,
                 items
         );
         orderService.createOrder(orderRequest, customer);

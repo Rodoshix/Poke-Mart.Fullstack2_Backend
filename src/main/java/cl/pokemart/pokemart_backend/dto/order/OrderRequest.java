@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Value
@@ -35,6 +37,8 @@ public class OrderRequest {
     String notas;
     @Size(max = 60)
     String metodoPago;
+    @PositiveOrZero
+    BigDecimal costoEnvio;
 
     @NotEmpty
     List<@Valid OrderItemRequest> items;

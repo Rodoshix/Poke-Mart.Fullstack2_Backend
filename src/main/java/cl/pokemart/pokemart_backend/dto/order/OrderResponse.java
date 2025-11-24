@@ -27,6 +27,7 @@ public class OrderResponse {
     BigDecimal descuento;
     BigDecimal impuestos;
     BigDecimal total;
+    Boolean ofertasAplicadas;
     String creadoEn;
     String actualizadoEn;
     List<Item> items;
@@ -59,6 +60,7 @@ public class OrderResponse {
                 .descuento(order.getDescuento())
                 .impuestos(order.getImpuestos())
                 .total(order.getTotal())
+                .ofertasAplicadas(hasOffers(order))
                 .creadoEn(order.getCreadoEn() != null ? order.getCreadoEn().toString() : null)
                 .actualizadoEn(order.getActualizadoEn() != null ? order.getActualizadoEn().toString() : null)
                 .items(order.getItems() == null ? List.of() : order.getItems().stream().map(OrderResponse::mapItem).toList())
@@ -73,5 +75,15 @@ public class OrderResponse {
                 .precioUnitario(item.getPrecioUnitario())
                 .totalLinea(item.getTotalLinea())
                 .build();
+    }
+
+    private static Boolean hasOffers(Order order) {
+        if (order.getItems() == null) return Boolean.FALSE;
+        return order.getItems().stream().anyMatch(item ->
+                item.getProducto() != null
+                        && item.getProducto().getPrice() != null
+                        && item.getPrecioUnitario() != null
+                        && item.getProducto().getPrice().compareTo(item.getPrecioUnitario()) > 0
+        );
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -250,6 +251,14 @@ public class UserService implements UserDetailsService {
 
         user.setProfile(profile);
         return userRepository.save(user);
+    }
+
+    public void touchLastLogin(Long userId) {
+        if (userId == null) return;
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setLastLoginAt(LocalDateTime.now());
+            userRepository.save(user);
+        });
     }
 
     private String normalize(String value) {
