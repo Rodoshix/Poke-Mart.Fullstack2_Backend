@@ -70,7 +70,7 @@ public class CatalogService {
 
     @Transactional(readOnly = true)
     public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         List<ProductOffer> offers = includeInactive ? productOfferRepository.findAll() : productOfferRepository.findActive(LocalDateTime.now());
         return offers.stream()
                 .filter(o -> isOfferVisibleForUser(o, current))
@@ -80,10 +80,9 @@ public class CatalogService {
 
     @Transactional(readOnly = true)
     public AdminOfferResponse getOfferForManagement(Long id, User current) {
-        ensureManager(current);
+        ensureAdmin(current);
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        enforceOfferOwnership(offer, current);
         return AdminOfferResponse.from(offer);
     }
 
