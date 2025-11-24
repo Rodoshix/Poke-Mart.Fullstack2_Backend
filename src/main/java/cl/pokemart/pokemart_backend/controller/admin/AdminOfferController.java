@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/offers")
+@RequestMapping("/api/v1/admin/offers")
 @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
 public class AdminOfferController {
 

@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/uploads")
+@RequestMapping("/api/v1/uploads")
 public class UploadController {
 
     private final FileStorageService fileStorageService;
