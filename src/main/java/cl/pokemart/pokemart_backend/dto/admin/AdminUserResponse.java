@@ -22,6 +22,7 @@ public class AdminUserResponse {
     String fechaNacimiento;
     String telefono;
     String avatarUrl;
+    String lastLoginAt;
 
     public static AdminUserResponse from(User user) {
         var profile = user.getProfile();
@@ -43,6 +44,7 @@ public class AdminUserResponse {
                         : null)
                 .telefono(profile != null ? profile.getTelefono() : null)
                 .avatarUrl(user.getAvatarUrl())
+                .lastLoginAt(user.getLastLoginAt() != null ? user.getLastLoginAt().toString() : null)
                 .build();
     }
 }
