@@ -14,9 +14,11 @@ import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -133,17 +135,17 @@ public class OrderService {
     }
 
     private OrderItem toOrderItem(Order order, OrderItemRequest itemReq) {
-        Product product = productRepository.findById(itemReq.getProductoId())
-                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado: " + itemReq.getProductoId()));
+        Product product = productRepository.findActiveByIdForUpdate(itemReq.getProductoId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Producto no disponible: " + itemReq.getProductoId()));
 
         int quantity = Math.max(1, itemReq.getCantidad());
+        validateStock(product, quantity);
         BigDecimal unitPrice = resolvePrice(product);
         BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
 
-        if (product.getStock() != null && product.getStock() > 0) {
-            int nextStock = Math.max(0, product.getStock() - quantity);
-            product.setStock(nextStock);
-        }
+        int stock = product.getStock() != null ? product.getStock() : 0;
+        int nextStock = stock - quantity;
+        product.setStock(nextStock);
 
         return OrderItem.builder()
                 .orden(order)
@@ -171,6 +173,19 @@ public class OrderService {
         return offers.stream()
                 .filter(o -> o.getProduct() != null && o.getProduct().getId().equals(product.getId()) && !o.isExpired())
                 .findFirst();
+    }
+
+    private void validateStock(Product product, int quantity) {
+        if (product == null || !Boolean.TRUE.equals(product.getActive())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Producto no disponible");
+        }
+        int stock = product.getStock() != null ? product.getStock() : 0;
+        if (stock <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stock agotado para " + product.getName());
+        }
+        if (quantity > stock) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stock insuficiente para " + product.getName() + " (disp: " + stock + ")");
+        }
     }
 
     private User resolveCustomer(OrderRequest request, User currentUser) {
