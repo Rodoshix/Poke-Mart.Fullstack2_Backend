@@ -1,7 +1,9 @@
 package cl.pokemart.pokemart_backend.config;
 
+import cl.pokemart.pokemart_backend.dto.blog.BlogRequest;
 import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
 import cl.pokemart.pokemart_backend.dto.order.OrderRequest;
+import cl.pokemart.pokemart_backend.service.blog.BlogService;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
@@ -48,6 +50,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductStockBaseRepository productStockBaseRepository;
     private final ProductReviewRepository productReviewRepository;
     private final OrderService orderService;
+    private final BlogService blogService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DataInitializer(UserService userService,
@@ -56,7 +59,8 @@ public class DataInitializer implements CommandLineRunner {
                            ProductOfferRepository productOfferRepository,
                            ProductStockBaseRepository productStockBaseRepository,
                            ProductReviewRepository productReviewRepository,
-                           OrderService orderService) {
+                           OrderService orderService,
+                           BlogService blogService) {
         this.userService = userService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
@@ -64,6 +68,7 @@ public class DataInitializer implements CommandLineRunner {
         this.productStockBaseRepository = productStockBaseRepository;
         this.productReviewRepository = productReviewRepository;
         this.orderService = orderService;
+        this.blogService = blogService;
     }
 
     @Override
@@ -110,6 +115,7 @@ public class DataInitializer implements CommandLineRunner {
                     vendor
             );
             seedReviewsFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/reviews.json"));
+            seedBlogs();
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
         }
@@ -167,6 +173,67 @@ public class DataInitializer implements CommandLineRunner {
         );
         orderService.createOrder(orderRequest, customer);
         log.info("Orden demo creada para {} {} con {} items", nombre, apellido, items.size());
+    }
+
+    private void seedBlogs() {
+        try {
+            if (!blogService.listAdmin(null, null, null).isEmpty()) {
+                log.info("No se sembraron blogs (ya existen entradas)");
+                return;
+            }
+
+            log.info("Sembrando blogs demo");
+            BlogRequest b1 = buildBlog("Guía rápida de Poké Balls para principiantes",
+                    "¿No sabes cuándo usar una Super Ball o una Ultra Ball? Repasamos los tipos de Poké Balls, sus ventajas y consejos para mejorar tu tasa de captura.",
+                    "Las Poké Balls básicas funcionan bien al inicio, pero conviene llevar siempre algunas Super Balls para encuentros sorpresivos. Recuerda usar bayas antes de lanzar y aprovechar los momentos en los que el Pokémon está menos agresivo.",
+                    "Guías",
+                    "https://images.unsplash.com/photo-1613771404721-f93648b600b0?auto=format&fit=crop&w=800&q=80",
+                    List.of("pokeballs", "consejos", "principiantes"),
+                    "PUBLISHED");
+
+            BlogRequest b2 = buildBlog("Kit de expedición esencial para rutas largas",
+                    "Checklist práctica para que no te falte nada en tu próxima aventura por las rutas.",
+                    "Incluye carpa liviana, repelentes, sacos de dormir y baterías de respaldo. Ajusta el kit al clima de la región y considera peso/espacio en tu mochila.",
+                    "Expedición",
+                    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
+                    List.of("expedicion", "checklist"),
+                    "PUBLISHED");
+
+            BlogRequest b3 = buildBlog("Tecnología Rotom: ventajas del Rotom Phone",
+                    "El Rotom Phone es más que un celular: mapa dinámico, Pokédex integrada y utilidades únicas.",
+                    "Ideal para entrenadores que viajan. Aprovecha la Pokédex integrada, mapas sin conexión y la compatibilidad con accesorios.",
+                    "Tecnología",
+                    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
+                    List.of("tecnologia", "rotom", "pokedex"),
+                    "PUBLISHED");
+
+            BlogRequest b4 = buildBlog("Cómo cuidar tus zapatillas de entrenador",
+                    "Trucos sencillos para alargar la vida de tus zapatillas en climas húmedos o con mucho polvo.",
+                    "Lávalas con suavidad, sécalas a la sombra y rota pares para extender su vida útil. Usa sprays repelentes si viajas a zonas lluviosas.",
+                    "Ropa",
+                    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
+                    List.of("ropa", "cuidado", "consejos"),
+                    "PUBLISHED");
+
+            blogService.create(b1);
+            blogService.create(b2);
+            blogService.create(b3);
+            blogService.create(b4);
+        } catch (Exception e) {
+            log.warn("No se pudieron sembrar blogs demo: {}", e.getMessage());
+        }
+    }
+
+    private BlogRequest buildBlog(String titulo, String descripcion, String contenido, String categoria, String imagen, List<String> etiquetas, String estado) {
+        BlogRequest r = new BlogRequest();
+        r.setTitulo(titulo);
+        r.setDescripcion(descripcion);
+        r.setContenido(contenido);
+        r.setCategoria(categoria);
+        r.setImagen(imagen);
+        r.setEtiquetas(etiquetas);
+        r.setEstado(estado);
+        return r;
     }
 
     private void seedUsersFromJson(Path jsonPath) {
