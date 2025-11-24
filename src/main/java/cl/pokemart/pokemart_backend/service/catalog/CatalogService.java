@@ -6,6 +6,7 @@ import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.AdminReviewResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
@@ -113,6 +114,13 @@ public class CatalogService {
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         return productReviewRepository.findByProductId(product.getId()).stream()
                 .map(ReviewResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminReviewResponse> listReviewsAdmin() {
+        return productReviewRepository.findAllWithProduct().stream()
+                .map(AdminReviewResponse::from)
                 .toList();
     }
 
