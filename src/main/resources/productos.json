@@ -1,0 +1,277 @@
+[
+  {
+    "id": 101,
+    "nombre": "Gorra Liga Pokémon",
+    "categoria": "Ropa",
+    "precio": 900,
+    "stock": 120,
+    "imagen": "src/assets/img/tienda/productos/gorro-liga-pokemon.png",
+    "descripcion": "La gorra oficial de la Liga Pokémon es un accesorio emblemático que todo entrenador debe tener. Su diseño combina un estilo clásico con materiales de alta calidad que garantizan durabilidad y frescura en climas cálidos. Protege eficazmente del sol durante los viajes largos, siendo un aliado indispensable en rutas y competiciones. Su emblema bordado simboliza orgullo y pertenencia al mundo Pokémon, haciendo de esta gorra mucho más que un simple complemento. Es ideal tanto para el uso diario como para coleccionistas que valoran artículos auténticos y llenos de historia."
+
+  },
+  {
+    "id": 102,
+    "nombre": "Chaqueta Entrenador",
+    "categoria": "Ropa",
+    "precio": 3200,
+    "stock": 60,
+    "imagen": "src/assets/img/tienda/productos/chaqueta-entrenador.png",
+    "descripcion": "La chaqueta de entrenador ha sido diseñada para soportar las exigencias de una vida en constante movimiento. Su tela resistente al agua y al desgaste permite enfrentar climas adversos sin sacrificar comodidad. Cuenta con bolsillos estratégicamente ubicados para llevar objetos esenciales en todo momento. Su estilo moderno con detalles inspirados en la estética Pokémon aporta identidad y confianza al portador. Es una prenda que fusiona practicidad, moda y el verdadero espíritu de aventura que caracteriza a cada entrenador."
+
+  },
+  {
+    "id": 103,
+    "nombre": "Camiseta Pikachu",
+    "categoria": "Ropa",
+    "precio": 1500,
+    "stock": 200,
+    "imagen": "src/assets/img/tienda/productos/camiseta-pikachu.png",
+    "descripcion": "Inspirada en la energía de Pikachu, esta camiseta representa un homenaje a uno de los Pokémon más queridos del mundo. Está confeccionada en algodón ligero y transpirable, ideal para largas jornadas de entrenamiento o salidas casuales. El estampado vibrante refleja la simpatía y vitalidad de Pikachu, convirtiéndola en un artículo llamativo para entrenadores de todas las edades. Su diseño versátil la hace fácil de combinar con cualquier estilo. Una prenda imprescindible que transmite optimismo, alegría y la esencia del universo Pokémon."
+
+  },
+  {
+    "id": 104,
+    "nombre": "Zapatillas deportivas",
+    "categoria": "Ropa",
+    "precio": 2800,
+    "stock": 85,
+    "imagen": "src/assets/img/tienda/productos/zapatillas-deportivas.png",
+    "descripcion": "Las zapatillas deportivas son la elección ideal para entrenadores que recorren grandes distancias en su día a día. Diseñadas con materiales ultraligeros y suela reforzada, brindan comodidad y estabilidad en todo tipo de terreno. Su estilo moderno incorpora detalles inspirados en el mundo Pokémon, otorgando un toque distintivo al outfit del aventurero. Los tejidos transpirables aseguran frescura incluso en caminatas prolongadas bajo el sol. Un calzado que mezcla resistencia, diseño y practicidad para quienes no se detienen nunca en su viaje Pokémon."
+  },
+  {
+    "id": 105,
+    "nombre": "Bicicleta de Montaña",
+    "categoria": "Transporte",
+    "precio": 80000,
+    "stock": 10,
+    "imagen": "src/assets/img/tienda/productos/bicicleta.png",
+    "descripcion": "La bicicleta de montaña es el medio de transporte definitivo para entrenadores que buscan velocidad, resistencia y aventura. Construida con un marco sólido y ligero, permite desplazarse rápidamente entre ciudades y rutas complicadas. Sus ruedas reforzadas aseguran estabilidad en terrenos irregulares, facilitando la exploración de nuevos caminos. Su diseño combina ergonomía con la estética clásica de la saga, siendo funcional y atractiva a la vez. Es una inversión indispensable para quienes desean recorrer el mundo Pokémon de manera eficiente y con estilo."
+  },
+  {
+    "id": 106,
+    "nombre": "Patines de Ruta",
+    "categoria": "Transporte",
+    "precio": 4500,
+    "stock": 40,
+    "imagen": "src/assets/img/tienda/productos/PatinesPokemon.png",
+    "descripcion": "Los patines de ruta ofrecen una alternativa divertida y veloz para recorrer caminos cortos y urbanos en el mundo Pokémon. Su diseño aerodinámico permite desplazamientos ágiles, mientras que las ruedas resistentes garantizan estabilidad en todo tipo de superficies. Están fabricados con materiales ligeros que reducen la fatiga y proporcionan comodidad durante largos trayectos. Además, incorporan un sistema de ajuste seguro que se adapta a distintos tamaños de pie. Una opción práctica, moderna y llena de estilo para entrenadores que buscan moverse con rapidez y libertad."
+  },
+  {
+    "id": 107,
+    "nombre": "Tienda de Campaña",
+    "categoria": "Expedición",
+    "precio": 7500,
+    "stock": 25,
+    "imagen": "src/assets/img/tienda/productos/TiendaCampPokemon.png",
+    "descripcion": "La tienda de campaña es el refugio ideal para cualquier entrenador que enfrente largas expediciones en rutas desafiantes. Está diseñada con materiales resistentes al agua y al viento, garantizando seguridad y confort en climas cambiantes. Su interior espacioso permite descansar cómodamente y almacenar objetos esenciales durante la noche. Fácil de armar y transportar, se convierte en un aliado indispensable para quienes viajan constantemente. Una inversión que combina practicidad y protección, asegurando que el descanso sea tan confiable como la aventura misma."
+  },
+  {
+    "id": 108,
+    "nombre": "Saco de dormir resistente",
+    "categoria": "Expedición",
+    "precio": 3000,
+    "stock": 50,
+    "imagen": "src/assets/img/tienda/productos/SacoDormir.png",
+    "descripcion": "El saco de dormir resistente es el compañero perfecto para entrenadores que pasan noches al aire libre durante sus viajes. Su relleno térmico de alta calidad mantiene el calor en climas fríos y asegura un descanso reparador. Está confeccionado con telas duraderas y ligeras que lo hacen fácil de transportar y guardar. Su diseño ergonómico se adapta al cuerpo, brindando comodidad y protección contra la humedad del suelo. Es un artículo fundamental para aventureros que buscan mantener energía y bienestar en cualquier jornada."
+  },
+  {
+    "id": 109,
+    "nombre": "Repelente",
+    "categoria": "Expedición",
+    "precio": 350,
+    "stock": 500,
+    "imagen": "src/assets/img/tienda/productos/repel.png",
+    "descripcion": "El repelente es un producto esencial para quienes desean viajar sin interrupciones por parte de Pokémon salvajes. Su fórmula especializada crea una barrera invisible que aleja a las criaturas durante un tiempo prolongado. Es ideal para entrenadores que necesitan concentrarse en sus entrenamientos o avanzar por rutas peligrosas sin distracciones. Su envase compacto lo hace fácil de llevar en mochilas o bolsillos. Confiable, práctico y accesible, es un recurso indispensable para quienes priorizan la seguridad y eficiencia en cada recorrido."
+  },
+  {
+    "id": 110,
+    "nombre": "Pokédex Galar",
+    "categoria": "Tecnología",
+    "precio": 12000,
+    "stock": 15,
+    "imagen": "src/assets/img/tienda/productos/PokedexGalar.png",
+    "descripcion": "La Pokédex de Galar es una herramienta tecnológica avanzada que recopila información detallada sobre todas las especies Pokémon de la región. Su interfaz moderna y su pantalla de alta resolución permiten acceder a datos biológicos, hábitos y movimientos con gran facilidad. Además de ser una guía enciclopédica, funciona como un dispositivo portátil de consulta para entrenadores expertos y novatos. Su diseño robusto y compacto asegura durabilidad en cualquier aventura. Es un símbolo de conocimiento, progreso y la curiosidad insaciable de todo maestro Pokémon."
+  },
+  {
+    "id": 111,
+    "nombre": "Rotom Phone",
+    "categoria": "Tecnología",
+    "precio": 15000,
+    "stock": 8,
+    "imagen": "src/assets/img/tienda/productos/RotomPhone.png",
+    "descripcion": "El Rotom Phone es mucho más que un simple dispositivo móvil: es una herramienta multifuncional que acompaña al entrenador en cada paso de su viaje. Gracias a la energía de Rotom, ofrece aplicaciones exclusivas como mapas interactivos, registro de objetos y conexión directa con la Pokédex. Su diseño compacto y resistente lo convierte en un aliado confiable incluso en entornos hostiles. Además, integra funciones de comunicación avanzadas para mantenerse en contacto con amigos y colegas. Un artículo de vanguardia que refleja la perfecta unión entre tecnología y vida Pokémon."
+  },
+  {
+    "id": 112,
+    "nombre": "Pokégear",
+    "categoria": "Tecnología",
+    "precio": 7000,
+    "stock": 30,
+    "imagen": "src/assets/img/tienda/productos/Pokegear.png",
+    "descripcion": "El Pokégear es un dispositivo portátil que revolucionó la manera en que los entrenadores organizan su vida diaria. Incluye aplicaciones esenciales como radio, reloj y GPS, optimizando cada expedición. Su diseño ligero y elegante permite llevarlo siempre consigo sin resultar incómodo. Es un símbolo de modernidad y eficiencia, ya que ayuda a planificar rutas y mantenerse informado mientras se exploran nuevas regiones. Un aparato versátil que marcó una generación y que sigue siendo fundamental para quienes valoran funcionalidad y tradición en un solo producto."
+  },
+
+  {
+    "id": 113,
+    "nombre": "Poké Ball",
+    "categoria": "Poké Balls",
+    "precio": 200,
+    "stock": 1000,
+    "imagen": "src/assets/img/tienda/productos/poke-Ball.png",
+    "descripcion": "La Poké Ball es el objeto más emblemático del mundo Pokémon, símbolo de aventura y amistad. Fabricada con precisión, permite capturar y resguardar de manera segura a los Pokémon salvajes. Su diseño clásico y resistente la hace confiable en todo tipo de escenarios, desde bosques hasta cuevas remotas. Es el punto de partida de cada entrenador y un recurso indispensable para cualquier viaje. Más que un simple objeto, representa el vínculo entre humanos y Pokémon, recordando que toda gran historia comienza con una Poké Ball en mano."
+  },
+  {
+    "id": 114,
+    "nombre": "Super Ball",
+    "categoria": "Poké Balls",
+    "precio": 600,
+    "stock": 700,
+    "imagen": "src/assets/img/tienda/productos/super-ball.png",
+    "descripcion": "La Super Ball es una versión mejorada de la clásica Poké Ball, diseñada para incrementar la tasa de captura de manera significativa. Su tecnología optimizada la hace especialmente útil frente a Pokémon de mediana dificultad. Es resistente, práctica y de fácil acceso, convirtiéndose en una herramienta esencial para entrenadores en crecimiento. Su diseño azul con detalles rojos la distingue a simple vista, aportando estilo y funcionalidad. Representa el siguiente paso en el camino del aventurero, brindando confianza y mayores posibilidades de éxito en cada encuentro."
+  },
+  {
+    "id": 115,
+    "nombre": "Ultra Ball",
+    "categoria": "Poké Balls",
+    "precio": 1200,
+    "stock": 400,
+    "imagen": "src/assets/img/tienda/productos/ultra-ball.png",
+    "descripcion": "La Ultra Ball es reconocida mundialmente como la elección predilecta de los entrenadores experimentados. Su avanzada tecnología aumenta de forma considerable las probabilidades de captura, incluso frente a Pokémon fuertes o esquivos. Es un objeto que combina elegancia con eficacia, destacando por su diseño negro y amarillo. Confiable en los momentos más decisivos de la aventura, es una herramienta que todo maestro Pokémon debe tener en grandes cantidades. Una Ultra Ball no solo facilita capturas, también simboliza preparación y profesionalismo en el viaje."
+  },
+  {
+    "id": 116,
+    "nombre": "Master Ball",
+    "categoria": "Poké Balls",
+    "precio": 1000,
+    "stock": 2,
+    "imagen": "src/assets/img/tienda/productos/master-ball.png",
+    "descripcion": "La Master Ball es el objeto más codiciado por entrenadores de todo el mundo, conocida por su capacidad de captura infalible. No importa cuán fuerte, raro o esquivo sea el Pokémon, esta esfera garantiza el éxito absoluto. Su diseño en tonos púrpura y detalles brillantes la convierte en un símbolo de poder y prestigio. Dada su rareza extrema, se utiliza únicamente en situaciones decisivas, cuando no existe margen para fallar. Más que un objeto, la Master Ball es un legado de confianza que representa el máximo logro de la tecnología en el universo Pokémon."
+  },
+  {
+    "id": 117,
+    "nombre": "Honor Ball",
+    "categoria": "Poké Balls",
+    "precio": 1000,
+    "stock": 150,
+    "imagen": "src/assets/img/tienda/productos/honor-ball.png",
+    "descripcion": "La Honor Ball, también conocida como Premier Ball, es un objeto de colección que celebra momentos especiales en la vida de los entrenadores. Su diseño minimalista en blanco con detalles rojos transmite elegancia y distinción. Aunque su efectividad es similar a una Poké Ball común, su valor simbólico es incalculable. Muchos entrenadores la reservan para capturas memorables, creando un vínculo único con sus Pokémon. Más que un instrumento de captura, es una muestra de estilo y orgullo que acompaña a quienes valoran la estética y el significado detrás de cada batalla."
+  },
+  {
+    "id": 118,
+    "nombre": "Safari Ball",
+    "categoria": "Poké Balls",
+    "precio": 500,
+    "stock": 200,
+    "imagen": "src/assets/img/tienda/productos/safari-ball.png",
+    "descripcion": "La Safari Ball es exclusiva de las zonas de safari, diseñada para capturar Pokémon en ambientes controlados y llenos de biodiversidad. Su apariencia verde refleja la conexión con la naturaleza y la aventura. Aunque su uso está restringido a lugares específicos, representa una experiencia inolvidable para todo entrenador. Es práctica, resistente y un recuerdo único de las exploraciones realizadas en reservas naturales. Tener una Safari Ball es portar un pedazo de historia, recordando momentos de descubrimiento y convivencia con especies difíciles de encontrar en libertad."
+  },
+  {
+    "id": 119,
+    "nombre": "Amor Ball",
+    "categoria": "Poké Balls",
+    "precio": 2000,
+    "stock": 60,
+    "imagen": "src/assets/img/tienda/productos/love-ball.png",
+    "descripcion": "La Amor Ball es un objeto muy especial, creado para reforzar los lazos entre Pokémon de un mismo grupo. Su diseño rosa con corazones simboliza afecto y conexión profunda. Aunque funcional como herramienta de captura, su verdadero valor radica en lo que representa: la importancia de los vínculos emocionales en la relación entre entrenadores y Pokémon. Usarla transmite cariño y respeto, convirtiendo cada captura en un acto significativo. Es un objeto ideal para coleccionistas y para quienes creen que la amistad es la base de toda aventura."
+  },
+  {
+    "id": 120,
+    "nombre": "Net Ball",
+    "categoria": "Poké Balls",
+    "precio": 2500,
+    "stock": 40,
+    "imagen": "src/assets/img/tienda/productos/net-ball.png",
+    "descripcion": "La Ente Ball, conocida también como Net Ball, está optimizada para capturar Pokémon de tipo Agua y Bicho. Su estructura especial genera ondas que se adaptan mejor a las condiciones de estos tipos, aumentando la probabilidad de éxito. Su diseño con tonos azules y entramados recuerda redes de pesca, reforzando su identidad. Es una herramienta estratégica para entrenadores que se adentran en mares, lagos o bosques infestados de insectos. Práctica, efectiva y distintiva, la Ente Ball es sinónimo de preparación frente a desafíos específicos en la naturaleza."
+  },
+  {
+    "id": 121,
+    "nombre": "Sana Ball",
+    "categoria": "Poké Balls",
+    "precio": 1000,
+    "stock": 120,
+    "imagen": "src/assets/img/tienda/productos/heal-ball.png",
+    "descripcion": "La Sana Ball, también llamada Heal Ball, es una Poké Ball diseñada con una característica única: restaura la salud del Pokémon capturado inmediatamente después de la captura. Su delicado diseño en tonos rosados y brillantes transmite una sensación de cuidado y protección. Es ideal para entrenadores que buscan mantener a sus compañeros en óptimas condiciones desde el primer momento. Más que una simple herramienta de captura, simboliza el compromiso con el bienestar de los Pokémon. Un objeto práctico y compasivo que refleja la importancia del cuidado en la aventura."
+  },
+  {
+    "id": 122,
+    "nombre": "Lujoball",
+    "categoria": "Poké Balls",
+    "precio": 3000,
+    "stock": 90,
+    "imagen": "src/assets/img/tienda/productos/luxury-ball.png",
+    "descripcion": "La Lujoball, o Luxury Ball, es un objeto elegante que refuerza el vínculo entre el entrenador y su Pokémon capturado. Su acabado negro con detalles dorados le da una apariencia sofisticada y exclusiva. Al mejorar la amistad del Pokémon de manera más rápida, se convierte en una opción estratégica para fortalecer la confianza en combates. Su rareza la hace un artículo de lujo, valorado tanto por entrenadores expertos como por coleccionistas. La Lujoball no solo captura, también genera lazos duraderos que trascienden más allá de la batalla."
+  },
+
+  {
+    "id": 123,
+    "nombre": "Poción",
+    "categoria": "Curación",
+    "precio": 300,
+    "stock": 500,
+    "imagen": "src/assets/img/tienda/productos/potion.png",
+    "descripcion": "La Poción es un recurso clásico y esencial para cualquier entrenador Pokémon. Su fórmula medicinal restaura 20 PS, brindando apoyo inmediato durante batallas o travesías. Ligera y de tamaño práctico, se transporta fácilmente en cualquier mochila. Su accesibilidad y bajo costo la convierten en un artículo indispensable para principiantes y veteranos. Más allá de su simplicidad, la Poción simboliza la preparación básica de un aventurero responsable que nunca debe subestimar la importancia de estar listo para lo inesperado."
+  },
+  {
+    "id": 124,
+    "nombre": "Superpoción",
+    "categoria": "Curación",
+    "precio": 700,
+    "stock": 350,
+    "imagen": "src/assets/img/tienda/productos/super-potion.png",
+    "descripcion": "La Superpoción es una evolución natural de la clásica Poción, capaz de restaurar 50 PS a un Pokémon herido. Su fórmula mejorada la convierte en un recurso valioso para combates más intensos y prolongados. Es lo suficientemente ligera para llevar varias en expediciones largas, garantizando que los compañeros se mantengan en condiciones óptimas. Su diseño moderno refleja el avance de la medicina Pokémon. Confiable y práctica, la Superpoción se ha convertido en un pilar en la estrategia de todo entrenador experimentado."
+  },
+  {
+    "id": 125,
+    "nombre": "Hiperpoción",
+    "categoria": "Curación",
+    "precio": 1500,
+    "stock": 200,
+    "imagen": "src/assets/img/tienda/productos/hyper-potion.png",
+    "descripcion": "La Hiperpoción es un artículo imprescindible para entrenadores que enfrentan desafíos de alto nivel. Su potente fórmula restaura 200 PS, permitiendo que los Pokémon resistan combates contra rivales formidables. Aunque es más costosa que otras medicinas, su eficacia justifica cada unidad invertida. Su envase resistente la hace fácil de llevar sin riesgo de derrames. Es un recurso que marca la diferencia en combates cruciales, asegurando que los compañeros puedan mantenerse en pie hasta el final. Un aliado estratégico para quienes aspiran a la victoria."
+  },
+  {
+    "id": 126,
+    "nombre": "Revivir",
+    "categoria": "Curación",
+    "precio": 1500,
+    "stock": 100,
+    "imagen": "src/assets/img/tienda/productos/revive.png",
+    "descripcion": "El Revivir es un objeto raro y altamente valorado en el mundo Pokémon, capaz de devolver a la vida a un compañero debilitado. Al restaurar la mitad de los PS del Pokémon, se convierte en un recurso vital en combates difíciles o exploraciones prolongadas. Su presentación en forma de cristal brillante transmite su carácter único y estratégico. Debido a su rareza, los entrenadores suelen guardarlo para momentos críticos. Es un artículo que simboliza esperanza y oportunidad, permitiendo continuar la aventura incluso en los escenarios más adversos."
+  },
+  {
+    "id": 127,
+    "nombre": "Restaurar Todo",
+    "categoria": "Curación",
+    "precio": 3000,
+    "stock": 80,
+    "imagen": "src/assets/img/tienda/productos/full-restore.png",
+    "descripcion": "El Restaurar Todo es una de las medicinas más completas y poderosas disponibles en Poké Mart. Este objeto cura cualquier estado alterado y restaura todos los PS del Pokémon, devolviéndole su capacidad plena de combate. Es ideal para enfrentamientos decisivos contra líderes de gimnasio, el Alto Mando o rivales exigentes. Su versatilidad lo convierte en una inversión indispensable para entrenadores de élite. Representa la máxima preparación y cuidado, garantizando que ningún obstáculo sea imposible de superar con un compañero en condiciones perfectas."
+  },
+  {
+    "id": 128,
+    "nombre": "Antídoto",
+    "categoria": "Curación",
+    "precio": 100,
+    "stock": 250,
+    "imagen": "src/assets/img/tienda/productos/antidote.png",
+    "descripcion": "El Antídoto es una medicina simple pero esencial, creada específicamente para neutralizar el veneno en los Pokémon. Aunque su precio es accesible, su utilidad en rutas infestadas de Pokémon venenosos es incalculable. Su fórmula actúa de inmediato, permitiendo que los compañeros sigan combatiendo o explorando sin riesgo. Es un artículo básico que nunca debe faltar en la mochila de un entrenador prevenido. Representa el cuidado y la responsabilidad, recordando que incluso los objetos más pequeños pueden salvar una aventura entera."
+  },
+  {
+    "id": 129,
+    "nombre": "Despertar",
+    "categoria": "Curación",
+    "precio": 250,
+    "stock": 180,
+    "imagen": "src/assets/img/tienda/productos/awakening.png",
+    "descripcion": "El Despertar es un objeto indispensable para contrarrestar el molesto estado de sueño en los combates. Su fórmula especial estimula al Pokémon, devolviéndole energía y concentración de inmediato. Es especialmente útil en enfrentamientos contra rivales que usan estrategias de control y desgaste. Su frasco ligero y compacto lo hace fácil de transportar en grandes cantidades. Más que una simple medicina, es una garantía de que los compañeros nunca quedarán indefensos en batalla. Un recurso estratégico que asegura la continuidad del combate en todo momento."
+  },
+  {
+    "id": 130,
+    "nombre": "Cura Total",
+    "categoria": "Curación",
+    "precio": 600,
+    "stock": 220,
+    "imagen": "src/assets/img/tienda/productos/full-heal.png",
+    "descripcion": "La Cura Total es una medicina versátil que elimina cualquier estado alterado, desde parálisis hasta quemaduras o congelación. Es un recurso práctico y confiable que asegura que los Pokémon mantengan su máximo rendimiento sin importar la situación. Su frasco compacto y fácil de transportar permite a los entrenadores llevarla siempre consigo. Es especialmente valiosa en expediciones largas, donde no siempre se puede prever qué desafíos aparecerán. La Cura Total representa tranquilidad y confianza, asegurando que nada detenga la conexión entre entrenador y Pokémon."
+  }
+]

@@ -24,11 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -108,12 +108,9 @@ public class DataInitializer implements CommandLineRunner {
                     Role.VENDEDOR
             );
 
-            seedUsersFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/users.json"));
-            seedCatalogFromJson(
-                    relPath("../Poke-Mart.Fullstack2_React/src/data/productos.json"),
-                    relPath("../Poke-Mart.Fullstack2_React/src/data/ofertas.json")
-            );
-            seedReviewsFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/reviews.json"));
+            seedUsersFromJson("users.json");
+            seedCatalogFromJson("productos.json", "ofertas.json");
+            seedReviewsFromJson("reviews.json");
             seedBlogs();
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
@@ -183,33 +180,33 @@ public class DataInitializer implements CommandLineRunner {
             }
 
             log.info("Sembrando blogs demo");
-            BlogRequest b1 = buildBlog("Guía rápida de Poké Balls para principiantes",
-                    "¿No sabes cuándo usar una Super Ball o una Ultra Ball? Repasamos los tipos de Poké Balls, sus ventajas y consejos para mejorar tu tasa de captura.",
-                    "Las Poké Balls básicas funcionan bien al inicio, pero conviene llevar siempre algunas Super Balls para encuentros sorpresivos. Recuerda usar bayas antes de lanzar y aprovechar los momentos en los que el Pokémon está menos agresivo.",
-                    "Guías",
+            BlogRequest b1 = buildBlog("Guia rapida de Poke Balls para principiantes",
+                    "No sabes cuando usar una Super Ball o una Ultra Ball? Repasamos los tipos de Poke Balls, sus ventajas y consejos para mejorar tu tasa de captura.",
+                    "Las Poke Balls basicas funcionan bien al inicio, pero conviene llevar siempre algunas Super Balls para encuentros sorpresivos. Recuerda usar bayas antes de lanzar y aprovechar los momentos en los que el Pokemon esta menos agresivo.",
+                    "Guias",
                     "https://images.unsplash.com/photo-1613771404721-f93648b600b0?auto=format&fit=crop&w=800&q=80",
                     List.of("pokeballs", "consejos", "principiantes"),
                     "PUBLISHED");
 
-            BlogRequest b2 = buildBlog("Kit de expedición esencial para rutas largas",
-                    "Checklist práctica para que no te falte nada en tu próxima aventura por las rutas.",
-                    "Incluye carpa liviana, repelentes, sacos de dormir y baterías de respaldo. Ajusta el kit al clima de la región y considera peso/espacio en tu mochila.",
-                    "Expedición",
+            BlogRequest b2 = buildBlog("Kit de expedicion esencial para rutas largas",
+                    "Checklist practica para que no te falte nada en tu proxima aventura por las rutas.",
+                    "Incluye carpa liviana, repelentes, sacos de dormir y baterias de respaldo. Ajusta el kit al clima de la region y considera peso/espacio en tu mochila.",
+                    "Expedicion",
                     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
                     List.of("expedicion", "checklist"),
                     "PUBLISHED");
 
-            BlogRequest b3 = buildBlog("Tecnología Rotom: ventajas del Rotom Phone",
-                    "El Rotom Phone es más que un celular: mapa dinámico, Pokédex integrada y utilidades únicas.",
-                    "Ideal para entrenadores que viajan. Aprovecha la Pokédex integrada, mapas sin conexión y la compatibilidad con accesorios.",
-                    "Tecnología",
+            BlogRequest b3 = buildBlog("Tecnologia Rotom: ventajas del Rotom Phone",
+                    "El Rotom Phone es mas que un celular: mapa dinamico, Pokedex integrada y utilidades unicas.",
+                    "Ideal para entrenadores que viajan. Aprovecha la Pokedex integrada, mapas sin conexion y la compatibilidad con accesorios.",
+                    "Tecnologia",
                     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
                     List.of("tecnologia", "rotom", "pokedex"),
                     "PUBLISHED");
 
-            BlogRequest b4 = buildBlog("Cómo cuidar tus zapatillas de entrenador",
-                    "Trucos sencillos para alargar la vida de tus zapatillas en climas húmedos o con mucho polvo.",
-                    "Lávalas con suavidad, sécalas a la sombra y rota pares para extender su vida útil. Usa sprays repelentes si viajas a zonas lluviosas.",
+            BlogRequest b4 = buildBlog("Como cuidar tus zapatillas de entrenador",
+                    "Trucos sencillos para alargar la vida de tus zapatillas en climas humedos o con mucho polvo.",
+                    "Lavalas con suavidad, secalas a la sombra y rota pares para extender su vida util. Usa sprays repelentes si viajas a zonas lluviosas.",
                     "Ropa",
                     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
                     List.of("ropa", "cuidado", "consejos"),
@@ -236,14 +233,13 @@ public class DataInitializer implements CommandLineRunner {
         return r;
     }
 
-    private void seedUsersFromJson(Path jsonPath) {
-        try {
-            File file = jsonPath.toFile();
-            if (!file.exists()) {
-                log.warn("No se encontró users.json en {}", jsonPath);
+    private void seedUsersFromJson(String resourcePath) {
+        try (InputStream is = readResource(resourcePath)) {
+            if (is == null) {
+                log.warn("No se encontró users.json en {}", resourcePath);
                 return;
             }
-            JsonNode root = objectMapper.readTree(file);
+            JsonNode root = objectMapper.readTree(is);
             JsonNode usersNode = root.has("users") ? root.get("users") : root;
             if (usersNode != null && usersNode.isArray()) {
                 for (JsonNode u : usersNode) {
@@ -291,14 +287,13 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void seedCatalogFromJson(Path productsPath, Path offersPath) {
-        try {
-            File file = productsPath.toFile();
-            if (!file.exists()) {
+    private void seedCatalogFromJson(String productsPath, String offersPath) {
+        try (InputStream productsIs = readResource(productsPath)) {
+            if (productsIs == null) {
                 log.warn("No se encontró productos.json en {}", productsPath);
                 return;
             }
-            List<Map<String, Object>> products = objectMapper.readValue(file, new TypeReference<>() {});
+            List<Map<String, Object>> products = objectMapper.readValue(productsIs, new TypeReference<>() {});
             Map<String, Category> categories = new HashMap<>();
 
             for (Map<String, Object> p : products) {
@@ -315,25 +310,26 @@ public class DataInitializer implements CommandLineRunner {
                 ensureProduct(name, desc, cat, image, price, stock);
             }
 
-            File offersFile = offersPath.toFile();
-            if (!offersFile.exists()) {
-                log.warn("No se encontró ofertas.json en {}", offersPath);
-                return;
-            }
-            List<Map<String, Object>> offers = objectMapper.readValue(offersFile, new TypeReference<>() {});
-            for (Map<String, Object> o : offers) {
-                Number productId = (Number) o.get("id");
-                if (productId == null) continue;
-                Product product = productRepository.findById(productId.longValue()).orElse(null);
-                if (product == null) continue;
-                int pct = ((Number) o.getOrDefault("discountPct", 0)).intValue();
-                LocalDateTime endsAt = null;
-                try {
-                    String ends = (String) o.get("endsAt");
-                    if (ends != null) endsAt = OffsetDateTime.parse(ends).toLocalDateTime();
-                } catch (Exception ignored) {
+            try (InputStream offersIs = readResource(offersPath)) {
+                if (offersIs == null) {
+                    log.warn("No se encontró ofertas.json en {}", offersPath);
+                    return;
                 }
-                ensureOffer(product, pct, endsAt);
+                List<Map<String, Object>> offers = objectMapper.readValue(offersIs, new TypeReference<>() {});
+                for (Map<String, Object> o : offers) {
+                    Number productId = (Number) o.get("id");
+                    if (productId == null) continue;
+                    Product product = productRepository.findById(productId.longValue()).orElse(null);
+                    if (product == null) continue;
+                    int pct = ((Number) o.getOrDefault("discountPct", 0)).intValue();
+                    LocalDateTime endsAt = null;
+                    try {
+                        String ends = (String) o.get("endsAt");
+                        if (ends != null) endsAt = OffsetDateTime.parse(ends).toLocalDateTime();
+                    } catch (Exception ignored) {
+                    }
+                    ensureOffer(product, pct, endsAt);
+                }
             }
         } catch (Exception e) {
             log.warn("Error cargando catalogo desde json: {}", e.getMessage());
@@ -382,14 +378,13 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void seedReviewsFromJson(Path reviewsPath) {
-        try {
-            File file = reviewsPath.toFile();
-            if (!file.exists()) {
+    private void seedReviewsFromJson(String reviewsPath) {
+        try (InputStream is = readResource(reviewsPath)) {
+            if (is == null) {
                 log.warn("No se encontró reviews.json en {}", reviewsPath);
                 return;
             }
-            Map<String, List<Map<String, Object>>> data = objectMapper.readValue(file, new TypeReference<>() {});
+            Map<String, List<Map<String, Object>>> data = objectMapper.readValue(is, new TypeReference<>() {});
             if (data == null || data.isEmpty()) {
                 log.info("reviews.json vacio, no se sembraron reseñas");
                 return;
@@ -440,8 +435,13 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private Path relPath(String relative) {
-        return Path.of(relative).normalize();
+    private InputStream readResource(String path) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            return resource.exists() ? resource.getInputStream() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String slugify(String input) {

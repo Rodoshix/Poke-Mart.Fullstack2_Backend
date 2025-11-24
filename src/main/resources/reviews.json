@@ -1,0 +1,1501 @@
+{
+  "1": [
+    {
+      "id": "1-r1",
+      "user": "Camila",
+      "rating": 5,
+      "texto": "Liviana y cómoda. El bordado de la Liga se ve increíble en persona.",
+      "fecha": "2025-08-20",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "1-r2",
+      "user": "Javier",
+      "rating": 4,
+      "texto": "Buen ajuste y no da calor. Me gustaría más colores.",
+      "fecha": "2025-08-28",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "1-r3",
+      "user": "Valentina",
+      "rating": 5,
+      "texto": "Ideal para entrenar al aire libre. Protege bien del sol.",
+      "fecha": "2025-09-01",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "1-r4",
+      "user": "Luis",
+      "rating": 4,
+      "texto": "Talla correcta y se siente resistente. Repetiría la compra.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "2": [
+    {
+      "id": "2-r1",
+      "user": "Isabel",
+      "rating": 5,
+      "texto": "Impermeable real. Ya me salvó en una lluvia en Ruta 4.",
+      "fecha": "2025-08-14",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "2-r2",
+      "user": "Tomás",
+      "rating": 4,
+      "texto": "Bolsillos útiles y cierres firmes. Un poco pesada.",
+      "fecha": "2025-08-30",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "2-r3",
+      "user": "Paula",
+      "rating": 5,
+      "texto": "Se ve pro y aguanta el trote diario. Muy recomendada.",
+      "fecha": "2025-09-03",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "2-r4",
+      "user": "Ricardo",
+      "rating": 4,
+      "texto": "Corte cómodo. El forro interno abriga lo justo.",
+      "fecha": "2025-09-07",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "3": [
+    {
+      "id": "3-r1",
+      "user": "Martina",
+      "rating": 5,
+      "texto": "Algodón suave y estampado fiel a Pikachu. No destiñe.",
+      "fecha": "2025-08-12",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "3-r2",
+      "user": "Diego",
+      "rating": 4,
+      "texto": "Calce cómodo. Ojalá hubiera versión oversized.",
+      "fecha": "2025-08-25",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "3-r3",
+      "user": "Antonia",
+      "rating": 5,
+      "texto": "Luce tal cual en las fotos. Excelente para el día a día.",
+      "fecha": "2025-09-02",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "3-r4",
+      "user": "Nicolás",
+      "rating": 4,
+      "texto": "Tela fresca. El tallaje es un poco justo, pedir una más.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "4": [
+    {
+      "id": "4-r1",
+      "user": "Gonzalo",
+      "rating": 5,
+      "texto": "Ligera y con buena amortiguación. Perfectas para rutas largas.",
+      "fecha": "2025-08-09",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "4-r2",
+      "user": "Sofía",
+      "rating": 4,
+      "texto": "Respiran bien. El diseño es sobrio pero bonito.",
+      "fecha": "2025-08-22",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "4-r3",
+      "user": "Benjamín",
+      "rating": 5,
+      "texto": "Se adhieren bien en terreno mixto. Muy conformes.",
+      "fecha": "2025-09-01",
+      "util": 1,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "4-r4",
+      "user": "Daniela",
+      "rating": 4,
+      "texto": "Cómodas, aunque el cordón podría ser más largo.",
+      "fecha": "2025-09-04",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "5": [
+    {
+      "id": "5-r1",
+      "user": "Alex",
+      "rating": 5,
+      "texto": "Marco firme y liviano. Subidas entre ciudades sin problema.",
+      "fecha": "2025-08-11",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "5-r2",
+      "user": "Marcela",
+      "rating": 4,
+      "texto": "Ruedas estables en ripio. El asiento es algo duro.",
+      "fecha": "2025-08-27",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 3,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "5-r3",
+      "user": "Mateo",
+      "rating": 5,
+      "texto": "Excelente relación peso/rendimiento. Llegó bien ajustada.",
+      "fecha": "2025-09-03",
+      "util": 1,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 3,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "5-r4",
+      "user": "Fernanda",
+      "rating": 4,
+      "texto": "Bonito diseño y buena ergonomía. Recomendable.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 3,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "6": [
+    {
+      "id": "6-r1",
+      "user": "Nicolás",
+      "rating": 5,
+      "texto": "Muy rápidos y fáciles de usar. Perfectos para trayectos cortos en ciudad.",
+      "fecha": "2025-08-13",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "6-r2",
+      "user": "Josefa",
+      "rating": 4,
+      "texto": "Ajustan bien, aunque el freno podría ser más firme.",
+      "fecha": "2025-08-25",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "6-r3",
+      "user": "Felipe",
+      "rating": 5,
+      "texto": "Comodísimos para entrenar Pokémon en la ciudad, buena estabilidad.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "6-r4",
+      "user": "Daniela",
+      "rating": 4,
+      "texto": "Buen diseño y color, pero pesan un poco más de lo esperado.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "7": [
+    {
+      "id": "7-r1",
+      "user": "Matías",
+      "rating": 5,
+      "texto": "Se arma rápido y es resistente al viento. Dormimos dos personas cómodas.",
+      "fecha": "2025-08-11",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "7-r2",
+      "user": "Camila",
+      "rating": 4,
+      "texto": "Buena impermeabilidad. Algo pesada para largas caminatas.",
+      "fecha": "2025-08-28",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "7-r3",
+      "user": "Cristóbal",
+      "rating": 5,
+      "texto": "Gran compra, superó mis expectativas en ruta.",
+      "fecha": "2025-09-01",
+      "util": 1,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "7-r4",
+      "user": "Antonia",
+      "rating": 4,
+      "texto": "Amplia y cómoda, pero ocupa bastante espacio en la mochila.",
+      "fecha": "2025-09-04",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "8": [
+    {
+      "id": "8-r1",
+      "user": "Valentina",
+      "rating": 5,
+      "texto": "Muy abrigado y ligero. Perfecto para climas fríos.",
+      "fecha": "2025-08-16",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "8-r2",
+      "user": "Sebastián",
+      "rating": 4,
+      "texto": "Buen tamaño, aunque algo voluminoso para transportar.",
+      "fecha": "2025-08-24",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "8-r3",
+      "user": "Francisca",
+      "rating": 5,
+      "texto": "Descansé de maravilla en mi última expedición.",
+      "fecha": "2025-09-03",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "8-r4",
+      "user": "Ignacio",
+      "rating": 4,
+      "texto": "Buen acolchado. Podría ser más resistente al agua.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "9": [
+    {
+      "id": "9-r1",
+      "user": "Felipe",
+      "rating": 5,
+      "texto": "Muy efectivo, los Pokémon salvajes ni se acercan.",
+      "fecha": "2025-08-18",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "9-r2",
+      "user": "Carolina",
+      "rating": 4,
+      "texto": "Compacto y fácil de llevar. Dura un poco menos de lo esperado.",
+      "fecha": "2025-08-27",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "9-r3",
+      "user": "Andrés",
+      "rating": 5,
+      "texto": "Me permitió llegar rápido sin interrupciones en la Ruta 9.",
+      "fecha": "2025-09-02",
+      "util": 1,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "9-r4",
+      "user": "Fernanda",
+      "rating": 4,
+      "texto": "Funciona bien, pero debería venir en envase más grande.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "10": [
+    {
+      "id": "10-r1",
+      "user": "Laura",
+      "rating": 5,
+      "texto": "Pantalla nítida y fácil de usar. Registro completo de Pokémon.",
+      "fecha": "2025-08-20",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "10-r2",
+      "user": "Rodrigo",
+      "rating": 4,
+      "texto": "Muy útil, aunque la batería podría durar más.",
+      "fecha": "2025-08-29",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "10-r3",
+      "user": "Ana",
+      "rating": 5,
+      "texto": "Diseño resistente. Ideal para exploradores constantes.",
+      "fecha": "2025-09-01",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "10-r4",
+      "user": "Cristina",
+      "rating": 4,
+      "texto": "Información muy completa. El peso es algo elevado.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "11": [
+    {
+      "id": "11-r1",
+      "user": "Esteban",
+      "rating": 5,
+      "texto": "El Rotom Phone es increíble, me ahorra tiempo con sus apps integradas.",
+      "fecha": "2025-08-18",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "11-r2",
+      "user": "Camila",
+      "rating": 4,
+      "texto": "Muy útil para conectar con la Pokédex. La batería dura lo justo.",
+      "fecha": "2025-08-28",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "11-r3",
+      "user": "Ignacio",
+      "rating": 5,
+      "texto": "Resistente, cayó varias veces y sigue funcionando perfecto.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "11-r4",
+      "user": "Paula",
+      "rating": 4,
+      "texto": "Genial para mapas y comunicación, aunque pesa un poco.",
+      "fecha": "2025-09-06",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "12": [
+    {
+      "id": "12-r1",
+      "user": "Diego",
+      "rating": 5,
+      "texto": "El Pokégear me salvó en un viaje, el GPS es preciso y fácil de usar.",
+      "fecha": "2025-08-19",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "12-r2",
+      "user": "Sofía",
+      "rating": 4,
+      "texto": "Muy práctico y ligero. La radio es un detalle genial.",
+      "fecha": "2025-08-30",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "12-r3",
+      "user": "Martín",
+      "rating": 5,
+      "texto": "Lo llevo a todos lados, diseño bonito y útil.",
+      "fecha": "2025-09-01",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "12-r4",
+      "user": "Carla",
+      "rating": 4,
+      "texto": "Buen aparato, aunque se raya fácil la pantalla.",
+      "fecha": "2025-09-04",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "13": [
+    {
+      "id": "13-r1",
+      "user": "Luis",
+      "rating": 5,
+      "texto": "La clásica Poké Ball, funciona perfecto y es económica.",
+      "fecha": "2025-08-12",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "13-r2",
+      "user": "Carolina",
+      "rating": 4,
+      "texto": "Muy práctica, aunque a veces falla con Pokémon fuertes.",
+      "fecha": "2025-08-26",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "13-r3",
+      "user": "Fernando",
+      "rating": 5,
+      "texto": "Un clásico imprescindible, llevo siempre varias.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "13-r4",
+      "user": "Josefina",
+      "rating": 4,
+      "texto": "Barata y efectiva, aunque prefiero combinarlas con otras.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "14": [
+    {
+      "id": "14-r1",
+      "user": "Andrés",
+      "rating": 5,
+      "texto": "La Super Ball es confiable, atrapé varios Pokémon medianos con facilidad.",
+      "fecha": "2025-08-15",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "14-r2",
+      "user": "Valentina",
+      "rating": 4,
+      "texto": "Muy buena, aunque prefiero invertir en Ultra Balls.",
+      "fecha": "2025-08-27",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "14-r3",
+      "user": "Patricio",
+      "rating": 5,
+      "texto": "Cumple perfecto, mejor tasa que la Poké Ball normal.",
+      "fecha": "2025-09-01",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "14-r4",
+      "user": "Fernanda",
+      "rating": 4,
+      "texto": "Buen diseño y resistente, pero se agotan rápido.",
+      "fecha": "2025-09-04",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "15": [
+    {
+      "id": "15-r1",
+      "user": "Rodrigo",
+      "rating": 5,
+      "texto": "La Ultra Ball nunca me falla, capturas seguras con Pokémon fuertes.",
+      "fecha": "2025-08-21",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "15-r2",
+      "user": "Marcela",
+      "rating": 4,
+      "texto": "Muy buena, aunque es más cara que otras opciones.",
+      "fecha": "2025-08-29",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "15-r3",
+      "user": "Gabriel",
+      "rating": 5,
+      "texto": "Ideal para Pokémon difíciles, vale cada moneda.",
+      "fecha": "2025-09-02",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "15-r4",
+      "user": "Claudia",
+      "rating": 4,
+      "texto": "Funciona bien, aunque prefiero ahorrar las Ultra para combates clave.",
+      "fecha": "2025-09-06",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "16": [
+    {
+      "id": "16-r1",
+      "user": "Camilo",
+      "rating": 5,
+      "texto": "La Master Ball es legendaria, capturó a un Pokémon difícil sin fallar.",
+      "fecha": "2025-08-15",
+      "util": 6,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "16-r2",
+      "user": "Isidora",
+      "rating": 5,
+      "texto": "Un objeto único, lo guardo para ocasiones especiales.",
+      "fecha": "2025-08-27",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "16-r3",
+      "user": "Benjamín",
+      "rating": 5,
+      "texto": "No hay nada mejor, debería haber más stock disponible.",
+      "fecha": "2025-09-01",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "16-r4",
+      "user": "Clara",
+      "rating": 5,
+      "texto": "Lo máximo, vale oro tener una en la mochila.",
+      "fecha": "2025-09-06",
+      "util": 1,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    }
+  ],
+  "17": [
+    {
+      "id": "17-r1",
+      "user": "Valentina",
+      "rating": 5,
+      "texto": "Hermosa Honor Ball, la uso solo para capturas especiales.",
+      "fecha": "2025-08-14",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "17-r2",
+      "user": "Andrés",
+      "rating": 4,
+      "texto": "Muy simbólica, aunque igual que la Poké Ball en efectividad.",
+      "fecha": "2025-08-28",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "17-r3",
+      "user": "Marcela",
+      "rating": 5,
+      "texto": "Un objeto de colección que se ve precioso en vivo.",
+      "fecha": "2025-09-03",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "17-r4",
+      "user": "Jorge",
+      "rating": 4,
+      "texto": "Me encanta su estética, pero la guardo como recuerdo.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "18": [
+    {
+      "id": "18-r1",
+      "user": "Catalina",
+      "rating": 5,
+      "texto": "La Safari Ball me trae recuerdos de aventuras en la reserva.",
+      "fecha": "2025-08-17",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "18-r2",
+      "user": "Rodrigo",
+      "rating": 4,
+      "texto": "Funciona bien, pero solo en zonas específicas.",
+      "fecha": "2025-08-29",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "18-r3",
+      "user": "Matilde",
+      "rating": 5,
+      "texto": "Es resistente y su diseño verde es precioso.",
+      "fecha": "2025-09-01",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "18-r4",
+      "user": "Sebastián",
+      "rating": 4,
+      "texto": "Me gusta como recuerdo de la zona Safari.",
+      "fecha": "2025-09-04",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "19": [
+    {
+      "id": "19-r1",
+      "user": "Isabel",
+      "rating": 5,
+      "texto": "La Amor Ball es preciosa, perfecta para capturas memorables.",
+      "fecha": "2025-08-16",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "19-r2",
+      "user": "Tomás",
+      "rating": 4,
+      "texto": "Bonita pero cara, la uso en ocasiones especiales.",
+      "fecha": "2025-08-28",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "19-r3",
+      "user": "Francisca",
+      "rating": 5,
+      "texto": "Un objeto simbólico que encanta a cualquiera.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "19-r4",
+      "user": "Ricardo",
+      "rating": 4,
+      "texto": "Me encanta su diseño, aunque se encuentra poco.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "20": [
+    {
+      "id": "20-r1",
+      "user": "Carla",
+      "rating": 5,
+      "texto": "La Ente Ball es perfecta para pescar Pokémon de agua.",
+      "fecha": "2025-08-13",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "20-r2",
+      "user": "Felipe",
+      "rating": 4,
+      "texto": "Muy útil en bosques llenos de bichos, se nota la diferencia.",
+      "fecha": "2025-08-27",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "20-r3",
+      "user": "Mariana",
+      "rating": 5,
+      "texto": "Diseño bonito y gran efectividad en su especialidad.",
+      "fecha": "2025-09-01",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "20-r4",
+      "user": "Cristóbal",
+      "rating": 4,
+      "texto": "Funciona bien, pero fuera de agua/bicho no tiene ventaja.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 4,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "21": [
+    {
+      "id": "21-r1",
+      "user": "Natalia",
+      "rating": 5,
+      "texto": "La Sana Ball es muy útil, me encanta que cure al Pokémon al atraparlo.",
+      "fecha": "2025-08-18",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "21-r2",
+      "user": "Felipe",
+      "rating": 4,
+      "texto": "Buen efecto de curación, aunque un poco cara.",
+      "fecha": "2025-08-27",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "21-r3",
+      "user": "Paula",
+      "rating": 5,
+      "texto": "Me ahorró el uso de pociones al atrapar, muy práctica.",
+      "fecha": "2025-09-01",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "21-r4",
+      "user": "Andrés",
+      "rating": 4,
+      "texto": "Funciona bien, aunque el diseño rosa no es de mi gusto.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "22": [
+    {
+      "id": "22-r1",
+      "user": "Valeria",
+      "rating": 5,
+      "texto": "La Lujoball se ve elegante y acelera la amistad del Pokémon.",
+      "fecha": "2025-08-16",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "22-r2",
+      "user": "Héctor",
+      "rating": 4,
+      "texto": "Muy bonita, aunque difícil de conseguir.",
+      "fecha": "2025-08-29",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "22-r3",
+      "user": "Carolina",
+      "rating": 5,
+      "texto": "Me encanta el acabado negro y dorado, vale cada peso.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "22-r4",
+      "user": "Ignacio",
+      "rating": 4,
+      "texto": "Refuerza la amistad, pero su precio es elevado.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "23": [
+    {
+      "id": "23-r1",
+      "user": "Francisca",
+      "rating": 5,
+      "texto": "La poción clásica, barata y siempre necesaria.",
+      "fecha": "2025-08-13",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "23-r2",
+      "user": "Rodrigo",
+      "rating": 4,
+      "texto": "Funciona perfecto pero restaura poco, sirve para emergencias.",
+      "fecha": "2025-08-25",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "23-r3",
+      "user": "Camila",
+      "rating": 5,
+      "texto": "Muy práctica, no salgo sin llevar al menos una.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "23-r4",
+      "user": "Jorge",
+      "rating": 4,
+      "texto": "Eficaz, aunque a veces prefiero comprar superpociones.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "24": [
+    {
+      "id": "24-r1",
+      "user": "Laura",
+      "rating": 5,
+      "texto": "Super práctica, cura más que la poción normal.",
+      "fecha": "2025-08-20",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "24-r2",
+      "user": "Matías",
+      "rating": 4,
+      "texto": "Funciona bien pero ocupa más espacio en la mochila.",
+      "fecha": "2025-08-28",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "24-r3",
+      "user": "Daniela",
+      "rating": 5,
+      "texto": "Me salvó en un combate contra un líder de gimnasio.",
+      "fecha": "2025-09-01",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "24-r4",
+      "user": "Cristian",
+      "rating": 4,
+      "texto": "Cumple muy bien, aunque prefiero llevar varias pociones chicas.",
+      "fecha": "2025-09-04",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "25": [
+    {
+      "id": "25-r1",
+      "user": "Alejandra",
+      "rating": 5,
+      "texto": "La hiperpoción es excelente, cura muchísimos PS.",
+      "fecha": "2025-08-19",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "25-r2",
+      "user": "Felipe",
+      "rating": 4,
+      "texto": "Muy buena pero cara, hay que usarla solo en emergencias.",
+      "fecha": "2025-08-29",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "25-r3",
+      "user": "Antonia",
+      "rating": 5,
+      "texto": "Me salvó en la Liga Pokémon, totalmente recomendada.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "25-r4",
+      "user": "Diego",
+      "rating": 4,
+      "texto": "Eficaz pero ocupa bastante espacio en la mochila.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],"26": [
+    {
+      "id": "26-r1",
+      "user": "Germán",
+      "rating": 5,
+      "texto": "Restaura al equipo en un momento crítico. Imprescindible para rutas largas.",
+      "fecha": "2025-08-18",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "26-r2",
+      "user": "Constanza",
+      "rating": 4,
+      "texto": "Muy efectivo, aunque ocupa espacio. Lo uso para combates clave.",
+      "fecha": "2025-08-30",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "26-r3",
+      "user": "Héctor",
+      "rating": 5,
+      "texto": "Me salvó la partida contra un líder de gimnasio.",
+      "fecha": "2025-09-02",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "26-r4",
+      "user": "Marina",
+      "rating": 4,
+      "texto": "Funciona perfecto, solo que es algo caro.",
+      "fecha": "2025-09-06",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "27": [
+    {
+      "id": "27-r1",
+      "user": "Iván",
+      "rating": 5,
+      "texto": "Revive a tu Pokémon y te da vuelta batallas apretadas.",
+      "fecha": "2025-08-17",
+      "util": 5,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "27-r2",
+      "user": "Josefa",
+      "rating": 4,
+      "texto": "Excelente, pero lo reservo para combates importantes.",
+      "fecha": "2025-08-26",
+      "util": 2,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "27-r3",
+      "user": "Patricio",
+      "rating": 5,
+      "texto": "Indispensable en la Liga. Me sacó de apuros varias veces.",
+      "fecha": "2025-09-01",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "27-r4",
+      "user": "Camila",
+      "rating": 4,
+      "texto": "Muy útil, aunque el stock se agota rápido.",
+      "fecha": "2025-09-05",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "28": [
+    {
+      "id": "28-r1",
+      "user": "Ricardo",
+      "rating": 5,
+      "texto": "Elimina estados alterados al instante. Perfecto tras combates largos.",
+      "fecha": "2025-08-19",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "28-r2",
+      "user": "Francisca",
+      "rating": 4,
+      "texto": "Muy práctico, sobre todo contra rivales que spamean parálisis.",
+      "fecha": "2025-08-31",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "28-r3",
+      "user": "Gonzalo",
+      "rating": 5,
+      "texto": "Me ahorró llevar varias curas separadas. Súper recomendable.",
+      "fecha": "2025-09-03",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "28-r4",
+      "user": "Daniela",
+      "rating": 4,
+      "texto": "Funciona perfecto, aunque preferiría formato más pequeño.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "29": [
+    {
+      "id": "29-r1",
+      "user": "Santiago",
+      "rating": 5,
+      "texto": "Despierta al instante. Me salvó en una cueva con Zubats.",
+      "fecha": "2025-08-15",
+      "util": 4,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "29-r2",
+      "user": "Belén",
+      "rating": 4,
+      "texto": "Muy práctico, aunque ojalá vinieran más por pack.",
+      "fecha": "2025-08-27",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "29-r3",
+      "user": "Tomás",
+      "rating": 5,
+      "texto": "Ligero y fácil de transportar, ideal para rutas largas.",
+      "fecha": "2025-09-02",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "29-r4",
+      "user": "Camila",
+      "rating": 4,
+      "texto": "Hace lo que promete. Buen precio.",
+      "fecha": "2025-09-05",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ],
+  "30": [
+    {
+      "id": "30-r1",
+      "user": "Agustina",
+      "rating": 5,
+      "texto": "Cura veneno rápidamente. Indispensable en zonas pantanosas.",
+      "fecha": "2025-08-20",
+      "util": 3,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "30-r2",
+      "user": "Javier",
+      "rating": 4,
+      "texto": "Muy útil después de combates contra bichos y plantas.",
+      "fecha": "2025-08-29",
+      "util": 1,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "30-r3",
+      "user": "Pilar",
+      "rating": 5,
+      "texto": "Formato compacto, perfecto para llevar varios.",
+      "fecha": "2025-09-03",
+      "util": 2,
+      "precioCalidad": 5,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 5,
+      "cantidadPiezas": 5
+    },
+    {
+      "id": "30-r4",
+      "user": "Diego",
+      "rating": 4,
+      "texto": "Funciona bien. Sería ideal un pack económico.",
+      "fecha": "2025-09-06",
+      "util": 0,
+      "precioCalidad": 4,
+      "facilidadLimpieza": 5,
+      "calidadMateriales": 4,
+      "cantidadPiezas": 5
+    }
+  ]
+}
