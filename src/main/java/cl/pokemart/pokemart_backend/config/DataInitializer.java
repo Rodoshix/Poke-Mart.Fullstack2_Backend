@@ -1,18 +1,20 @@
 package cl.pokemart.pokemart_backend.config;
 
+import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
+import cl.pokemart.pokemart_backend.dto.order.OrderRequest;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
+import cl.pokemart.pokemart_backend.model.catalog.ProductReview;
 import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
-import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
-import cl.pokemart.pokemart_backend.dto.order.OrderRequest;
-import cl.pokemart.pokemart_backend.service.order.OrderService;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
+import cl.pokemart.pokemart_backend.service.order.OrderService;
 import cl.pokemart.pokemart_backend.service.user.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,6 +46,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final ProductOfferRepository productOfferRepository;
     private final ProductStockBaseRepository productStockBaseRepository;
+    private final ProductReviewRepository productReviewRepository;
     private final OrderService orderService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -52,12 +55,14 @@ public class DataInitializer implements CommandLineRunner {
                            ProductRepository productRepository,
                            ProductOfferRepository productOfferRepository,
                            ProductStockBaseRepository productStockBaseRepository,
+                           ProductReviewRepository productReviewRepository,
                            OrderService orderService) {
         this.userService = userService;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
         this.productStockBaseRepository = productStockBaseRepository;
+        this.productReviewRepository = productReviewRepository;
         this.orderService = orderService;
     }
 
@@ -69,7 +74,6 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedUsersAndCatalog() {
         try {
-            // Admin y vendedor con credenciales pedidas
             userService.ensureUser(
                     "admin@pokemart.cl",
                     "admin",
@@ -105,6 +109,7 @@ public class DataInitializer implements CommandLineRunner {
                     relPath("../Poke-Mart.Fullstack2_React/src/data/ofertas.json"),
                     vendor
             );
+            seedReviewsFromJson(relPath("../Poke-Mart.Fullstack2_React/src/data/reviews.json"));
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
         }
@@ -118,7 +123,6 @@ public class DataInitializer implements CommandLineRunner {
                 return;
             }
 
-            // pick first cliente
             List<User> allUsers = userService.findAll();
             Optional<User> anyClient = allUsers.stream().filter(u -> u.getRole() == Role.CLIENTE).findFirst();
             User customer = anyClient.orElse(allUsers.stream().filter(u -> u.getRole() == Role.VENDEDOR || u.getRole() == Role.ADMIN).findFirst().orElse(null));
@@ -178,7 +182,7 @@ public class DataInitializer implements CommandLineRunner {
                 for (JsonNode u : usersNode) {
                     String roleStr = u.path("role").asText("cliente").toUpperCase();
                     Role role = "ADMIN".equals(roleStr) ? Role.ADMIN : "VENDEDOR".equals(roleStr) ? Role.VENDEDOR : Role.CLIENTE;
-                    if (role != Role.CLIENTE) continue; // admin/vendedor ya seedeados
+                    if (role != Role.CLIENTE) continue;
 
                     String email = u.path("email").asText();
                     String username = u.path("username").asText();
@@ -309,6 +313,64 @@ public class DataInitializer implements CommandLineRunner {
                     .endsAt(endsAt)
                     .active(true)
                     .build());
+        }
+    }
+
+    private void seedReviewsFromJson(Path reviewsPath) {
+        try {
+            File file = reviewsPath.toFile();
+            if (!file.exists()) {
+                log.warn("No se encontró reviews.json en {}", reviewsPath);
+                return;
+            }
+            Map<String, List<Map<String, Object>>> data = objectMapper.readValue(file, new TypeReference<>() {});
+            if (data == null || data.isEmpty()) {
+                log.info("reviews.json vacio, no se sembraron reseñas");
+                return;
+            }
+            List<User> clients = userService.findAll().stream()
+                    .filter(u -> u.getRole() == Role.CLIENTE)
+                    .toList();
+            if (clients.isEmpty()) {
+                log.warn("No hay clientes para asociar reseñas; se omite seed de reviews");
+                return;
+            }
+            int clientIndex = 0;
+            for (Map.Entry<String, List<Map<String, Object>>> entry : data.entrySet()) {
+                Long productId = null;
+                try {
+                    productId = Long.parseLong(entry.getKey());
+                } catch (NumberFormatException ignored) {
+                }
+                if (productId == null) continue;
+                if (productReviewRepository.countByProductId(productId) > 0) continue;
+                Product product = productRepository.findById(productId).orElse(null);
+                if (product == null) continue;
+
+                for (Map<String, Object> r : entry.getValue()) {
+                    User author = clients.get(clientIndex % clients.size());
+                    clientIndex++;
+                    Integer rating = ((Number) r.getOrDefault("rating", 5)).intValue();
+                    String comment = (String) r.getOrDefault("texto", "Sin comentario");
+                    LocalDate date = null;
+                    try {
+                        String fecha = (String) r.get("fecha");
+                        if (fecha != null) date = LocalDate.parse(fecha);
+                    } catch (Exception ignored) {}
+                    ProductReview review = ProductReview.builder()
+                            .product(product)
+                            .user(author)
+                            .authorName(author.getDisplayName())
+                            .rating(rating)
+                            .comment(comment)
+                            .createdAt(date != null ? date.atStartOfDay() : LocalDateTime.now())
+                            .build();
+                    productReviewRepository.save(review);
+                }
+            }
+            log.info("Seeded reviews desde reviews.json");
+        } catch (Exception e) {
+            log.warn("Error sembrando reseñas: {}", e.getMessage());
         }
     }
 

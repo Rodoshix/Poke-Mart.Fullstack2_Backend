@@ -4,16 +4,20 @@ import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.ReviewRequest;
+import cl.pokemart.pokemart_backend.dto.catalog.ReviewResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
 import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
+import cl.pokemart.pokemart_backend.model.catalog.ProductReview;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
 import cl.pokemart.pokemart_backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,19 +41,22 @@ public class CatalogService {
     private final UserRepository userRepository;
     private final ProductStockBaseRepository productStockBaseRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ProductReviewRepository productReviewRepository;
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
                           ProductOfferRepository productOfferRepository,
                           UserRepository userRepository,
                           ProductStockBaseRepository productStockBaseRepository,
-                          OrderItemRepository orderItemRepository) {
+                          OrderItemRepository orderItemRepository,
+                          ProductReviewRepository productReviewRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
         this.userRepository = userRepository;
         this.productStockBaseRepository = productStockBaseRepository;
         this.orderItemRepository = orderItemRepository;
+        this.productReviewRepository = productReviewRepository;
     }
 
     // Public
@@ -98,6 +105,30 @@ public class CatalogService {
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return mapToResponse(product, findOfferForProduct(product, offers));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> listReviews(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        return productReviewRepository.findByProductId(product.getId()).stream()
+                .map(ReviewResponse::from)
+                .toList();
+    }
+
+    public ReviewResponse addReview(Long productId, ReviewRequest request, User current) {
+        if (current == null) throw new SecurityException("No autenticado");
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        ProductReview review = ProductReview.builder()
+                .product(product)
+                .user(current)
+                .rating(request.getRating())
+                .comment(request.getComment())
+                .authorName(current.getDisplayName())
+                .build();
+        ProductReview saved = productReviewRepository.save(review);
+        return ReviewResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -275,6 +306,12 @@ public class CatalogService {
         }
     }
 
+    public void deleteReview(Long id) {
+        var review = productReviewRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Review no encontrada"));
+        productReviewRepository.delete(review);
+    }
+
     // Helpers
     private void enforceOwnership(Product product, User current) {
         if (current == null) {
@@ -362,6 +399,8 @@ public class CatalogService {
         Integer stockBase = productStockBaseRepository.findByProductId(product.getId())
                 .map(ProductStockBase::getStockBase)
                 .orElse(null);
+        long reviewCount = productReviewRepository.countByProductId(product.getId());
+        double reviewAvg = productReviewRepository.averageRating(product.getId()).orElse(0.0);
         return ProductResponse.builder()
                 .id(product.getId())
                 .nombre(product.getName())
@@ -373,6 +412,8 @@ public class CatalogService {
                 .categoria(product.getCategory() != null ? product.getCategory().getName() : null)
                 .offer(offerInfo)
                 .vendedor(product.getSeller() != null ? product.getSeller().getUsername() : null)
+                .reviewCount((int) reviewCount)
+                .reviewAvg(reviewAvg)
                 .active(product.getActive())
                 .build();
     }

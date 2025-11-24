@@ -18,6 +18,8 @@ public class ProductResponse {
     String categoria;
     OfferInfo offer;
     String vendedor;
+    Integer reviewCount;
+    Double reviewAvg;
     Boolean active;
 
     @Value
