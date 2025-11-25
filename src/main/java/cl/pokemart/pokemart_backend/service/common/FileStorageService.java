@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,6 +61,43 @@ public class FileStorageService {
 
         String url = "/uploads/" + filename;
         return new StoredFile(url, filename, file.getSize(), contentType);
+    }
+
+    /**
+     * Borra un archivo previamente subido si corresponde al directorio configurado.
+     * Retorna true si se borró, false si no aplicaba o no existía.
+     */
+    public boolean deleteByUrl(String imageUrl) {
+        if (!StringUtils.hasText(imageUrl)) {
+            return false;
+        }
+        try {
+            String normalized = imageUrl.trim();
+            String pathPart = normalized;
+            if (normalized.startsWith("http")) {
+                pathPart = URI.create(normalized).getPath();
+            }
+            // Preferir segmento después de /uploads/ si existe
+            int uploadsIdx = pathPart.lastIndexOf("/uploads/");
+            String filename;
+            if (uploadsIdx >= 0) {
+                filename = pathPart.substring(uploadsIdx + "/uploads/".length());
+            } else {
+                int lastSlash = pathPart.lastIndexOf('/');
+                filename = lastSlash >= 0 ? pathPart.substring(lastSlash + 1) : pathPart;
+            }
+            if (!StringUtils.hasText(filename)) {
+                return false;
+            }
+            Path target = uploadDir.resolve(filename).normalize();
+            if (!target.startsWith(uploadDir)) {
+                return false;
+            }
+            return Files.deleteIfExists(target);
+        } catch (Exception e) {
+            // No propagar: si no se puede borrar, no bloquear la operación principal
+            return false;
+        }
     }
 
     private String resolveExtension(String originalFilename, String contentType) {

@@ -20,6 +20,7 @@ import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
+import cl.pokemart.pokemart_backend.service.common.FileStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,19 +42,22 @@ public class CatalogService {
     private final ProductStockBaseRepository productStockBaseRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductReviewRepository productReviewRepository;
+    private final FileStorageService fileStorageService;
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
                           ProductOfferRepository productOfferRepository,
                           ProductStockBaseRepository productStockBaseRepository,
                           OrderItemRepository orderItemRepository,
-                          ProductReviewRepository productReviewRepository) {
+                          ProductReviewRepository productReviewRepository,
+                          FileStorageService fileStorageService) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productOfferRepository = productOfferRepository;
         this.productStockBaseRepository = productStockBaseRepository;
         this.orderItemRepository = orderItemRepository;
         this.productReviewRepository = productReviewRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     // Public
@@ -179,6 +183,7 @@ public class CatalogService {
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
 
+        String previousImageUrl = product.getImageUrl();
         product.setName(request.getNombre());
         product.setDescription(request.getDescripcion());
         product.setPrice(request.getPrecio());
@@ -187,6 +192,12 @@ public class CatalogService {
         product.setCategory(category);
         if (request.getStockBase() != null) {
             ensureStockBase(product, request.getStockBase());
+        }
+        // Si la imagen cambió, intenta borrar la anterior para no dejar archivos huérfanos
+        if (StringUtils.hasText(previousImageUrl)
+                && request.getImagenUrl() != null
+                && !previousImageUrl.equals(request.getImagenUrl())) {
+            fileStorageService.deleteByUrl(previousImageUrl);
         }
 
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
@@ -204,6 +215,7 @@ public class CatalogService {
         ensureAdmin(current);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        String imageUrl = product.getImageUrl();
         if (!hardDelete) {
             product.setActive(false);
             return;
@@ -219,6 +231,7 @@ public class CatalogService {
             orderItemRepository.saveAll(orderItems);
         }
         productRepository.delete(product);
+        fileStorageService.deleteByUrl(imageUrl);
     }
 
     public ProductResponse addOffer(Long productId, Integer discountPct, LocalDateTime endsAt, User current) {
