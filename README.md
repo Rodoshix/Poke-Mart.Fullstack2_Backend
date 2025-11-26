@@ -48,8 +48,9 @@ Para desactivar o ajustar seeding, modifica `DataInitializer` o usa un perfil se
 Flujo implementado:
 - El frontend solicita `/api/v1/payments/mp/preference` con los datos de envío y carrito.
 - El backend crea una `preference` en Mercado Pago usando precios/stock de la BD y guarda un `PaymentIntent` (snapshot del pedido).
-- Mercado Pago redirige al usuario y envía notificaciones al webhook `/api/v1/payments/mp/webhook`.
-- Cuando el pago se marca `approved`, el backend crea la orden y descuenta stock; si se rechaza/cancela, no se crea la orden.
+- Mercado Pago redirige al usuario y puede enviar notificaciones al webhook `/api/v1/payments/mp/webhook`.
+- Si usas webhook: cuando el pago se marca `approved`, el backend crea la orden y descuenta stock; si se rechaza/cancela, no se crea la orden.
+- Si prefieres retorno (sin webhook): en la URL de éxito el frontend recibe `payment_id` y llama a `POST /api/v1/payments/mp/confirm`, que consulta el pago en MP y crea la orden solo si está `approved`.
 
 Configura estas variables/propiedades antes de probar:
 - `MERCADOPAGO_ACCESS_TOKEN`: token sandbox.

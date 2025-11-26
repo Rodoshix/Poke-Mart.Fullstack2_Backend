@@ -1,5 +1,7 @@
 package cl.pokemart.pokemart_backend.controller.payment;
 
+import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationRequest;
+import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationResponse;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentPreferenceRequest;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentPreferenceResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
@@ -55,5 +57,11 @@ public class PaymentController {
             paymentService.handlePaymentNotification(dataId);
         }
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Confirmar pago (retorno)", description = "Consulta el pago en Mercado Pago y crea la orden si el pago fue aprobado.")
+    @PostMapping("/confirm")
+    public PaymentConfirmationResponse confirm(@Valid @RequestBody PaymentConfirmationRequest request) {
+        return paymentService.confirmPayment(request);
     }
 }

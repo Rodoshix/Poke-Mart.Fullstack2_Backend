@@ -4,6 +4,8 @@ import cl.pokemart.pokemart_backend.config.MercadoPagoProperties;
 import cl.pokemart.pokemart_backend.dto.order.OrderItemRequest;
 import cl.pokemart.pokemart_backend.dto.order.OrderRequest;
 import cl.pokemart.pokemart_backend.dto.order.OrderResponse;
+import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationRequest;
+import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationResponse;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentPreferenceRequest;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentPreferenceResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
@@ -23,14 +25,19 @@ import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.resources.payment.Payment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 @Service
 public class PaymentService {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 
     private final MercadoPagoProperties properties;
     private final PaymentIntentRepository paymentIntentRepository;
@@ -81,26 +88,29 @@ public class PaymentService {
         String externalReference = String.valueOf(saved.getId());
         saved.setExternalReference(externalReference);
 
-        PreferenceRequest prefReq = PreferenceRequest.builder()
+        var prefBuilder = PreferenceRequest.builder()
                 .items(items)
                 .payer(PreferencePayerRequest.builder()
                         .name(request.getNombre())
                         .surname(request.getApellido())
                         .email(request.getCorreo())
                         .build())
-                .backUrls(PreferenceBackUrlsRequest.builder()
-                        .success(properties.getSuccessUrl())
-                        .failure(properties.getFailureUrl())
-                        .pending(properties.getPendingUrl())
-                        .build())
-                .autoReturn("approved")
-                .notificationUrl(properties.getNotificationUrl())
                 .externalReference(externalReference)
-                .metadata(java.util.Map.of("intentId", externalReference))
-                .build();
+                .metadata(java.util.Map.of("intentId", externalReference));
+
+        var backUrls = buildBackUrls();
+        if (backUrls != null) {
+            prefBuilder.backUrls(backUrls).autoReturn("approved");
+        }
+
+        if (StringUtils.hasText(properties.getNotificationUrl())) {
+            prefBuilder.notificationUrl(properties.getNotificationUrl());
+        }
+
+        PreferenceRequest prefReq = prefBuilder.build();
 
         PreferenceClient client = new PreferenceClient();
-        var preference = client.create(prefReq);
+        var preference = createPreferenceSafe(client, prefReq);
 
         saved.setPreferenceId(preference.getId());
         paymentIntentRepository.save(saved);
@@ -116,7 +126,7 @@ public class PaymentService {
     public void handlePaymentNotification(Long paymentId) {
         ensureAccessToken();
         PaymentClient paymentClient = new PaymentClient();
-        Payment payment = paymentClient.get(paymentId);
+        Payment payment = getPaymentSafe(paymentClient, paymentId);
         if (payment == null) return;
 
         String externalReference = payment.getExternalReference();
@@ -142,6 +152,91 @@ public class PaymentService {
         }
 
         paymentIntentRepository.save(intent);
+    }
+
+    @Transactional
+    public PaymentConfirmationResponse confirmPayment(PaymentConfirmationRequest request) {
+        ensureAccessToken();
+        if (request == null || request.getPaymentId() == null) {
+            throw new IllegalArgumentException("paymentId es requerido");
+        }
+
+        PaymentClient paymentClient = new PaymentClient();
+        Payment payment = getPaymentSafe(paymentClient, request.getPaymentId());
+        if (payment == null) {
+            throw new IllegalArgumentException("Pago no encontrado en Mercado Pago");
+        }
+
+        PaymentIntent intent = findIntent(request.getPreferenceId(), request.getExternalReference(), payment);
+        if (intent == null) {
+            throw new IllegalStateException("No se encontró la intención de pago asociada");
+        }
+
+        intent.setPaymentId(String.valueOf(request.getPaymentId()));
+        String status = payment.getStatus();
+
+        if ("approved".equalsIgnoreCase(status)) {
+            if (!PaymentIntentStatus.APROBADO.equals(intent.getStatus())) {
+                OrderResponse order = persistOrder(intent);
+                intent.setOrderId(order.getId());
+                intent.setStatus(PaymentIntentStatus.APROBADO);
+            }
+            paymentIntentRepository.save(intent);
+            return PaymentConfirmationResponse.builder()
+                    .status("approved")
+                    .orderId(intent.getOrderId())
+                    .paymentId(intent.getPaymentId())
+                    .preferenceId(intent.getPreferenceId())
+                    .externalReference(intent.getExternalReference())
+                    .message("Pago aprobado")
+                    .build();
+        }
+
+        if ("rejected".equalsIgnoreCase(status) || "cancelled".equalsIgnoreCase(status)) {
+            intent.setStatus(PaymentIntentStatus.FALLIDO);
+            paymentIntentRepository.save(intent);
+            return PaymentConfirmationResponse.builder()
+                    .status("rejected")
+                    .paymentId(intent.getPaymentId())
+                    .preferenceId(intent.getPreferenceId())
+                    .externalReference(intent.getExternalReference())
+                    .message("Pago rechazado o cancelado")
+                    .build();
+        }
+
+        intent.setStatus(PaymentIntentStatus.PENDIENTE);
+        paymentIntentRepository.save(intent);
+        return PaymentConfirmationResponse.builder()
+                .status(status != null ? status.toLowerCase() : "pending")
+                .paymentId(intent.getPaymentId())
+                .preferenceId(intent.getPreferenceId())
+                .externalReference(intent.getExternalReference())
+                .message("Pago pendiente")
+                .build();
+    }
+
+    private PaymentIntent findIntent(String preferenceId, String externalReference, Payment payment) {
+        String pref = preferenceId;
+        String extRef = externalReference;
+        if (!StringUtils.hasText(extRef)) {
+            extRef = payment.getExternalReference();
+        }
+        if (!StringUtils.hasText(pref) && payment.getMetadata() != null) {
+            Object metaPref = payment.getMetadata().get("preference_id");
+            if (metaPref != null) {
+                pref = String.valueOf(metaPref);
+            }
+        }
+
+        if (StringUtils.hasText(pref)) {
+            Optional<PaymentIntent> byPref = paymentIntentRepository.findByPreferenceId(pref);
+            if (byPref.isPresent()) return byPref.get();
+        }
+        if (StringUtils.hasText(extRef)) {
+            Optional<PaymentIntent> byExt = paymentIntentRepository.findByExternalReference(extRef);
+            if (byExt.isPresent()) return byExt.get();
+        }
+        return null;
     }
 
     private OrderResponse persistOrder(PaymentIntent intent) {
@@ -189,6 +284,32 @@ public class PaymentService {
         }
     }
 
+    private Payment getPaymentSafe(PaymentClient client, Long paymentId) {
+        try {
+            return client.get(paymentId);
+        } catch (com.mercadopago.exceptions.MPApiException e) {
+            String details = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
+            int status = e.getApiResponse() != null ? e.getApiResponse().getStatusCode() : 0;
+            log.error("Error MP al obtener pago {} (status {}): {}", paymentId, status, details);
+            throw new IllegalStateException("MP API error al obtener el pago (status " + status + "): " + details, e);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo obtener el pago desde Mercado Pago", e);
+        }
+    }
+
+    private com.mercadopago.resources.preference.Preference createPreferenceSafe(PreferenceClient client, PreferenceRequest request) {
+        try {
+            return client.create(request);
+        } catch (com.mercadopago.exceptions.MPApiException e) {
+            String details = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
+            int status = e.getApiResponse() != null ? e.getApiResponse().getStatusCode() : 0;
+            log.error("Error MP al crear preferencia (status {}): {}", status, details);
+            throw new IllegalStateException("MP API error al crear la preferencia (status " + status + "): " + details, e);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo crear la preferencia en Mercado Pago", e);
+        }
+    }
+    
     private void ensureAccessToken() {
         if (!StringUtils.hasText(properties.getAccessToken())) {
             throw new IllegalStateException("Configura el access token de Mercado Pago (sandbox) en mercadopago.access-token");
@@ -197,5 +318,26 @@ public class PaymentService {
         if (StringUtils.hasText(properties.getIntegratorId())) {
             MercadoPagoConfig.setIntegratorId(properties.getIntegratorId());
         }
+    }
+
+    private PreferenceBackUrlsRequest buildBackUrls() {
+        String success = properties.getSuccessUrl();
+        String failure = properties.getFailureUrl();
+        String pending = properties.getPendingUrl();
+
+        // Mercado Pago suele requerir https para auto_return; si no hay https, omitimos back_urls
+        if (!isHttps(success) || !isHttps(failure) || !isHttps(pending)) {
+            return null;
+        }
+
+        return PreferenceBackUrlsRequest.builder()
+                .success(success)
+                .failure(failure)
+                .pending(pending)
+                .build();
+    }
+
+    private boolean isHttps(String url) {
+        return StringUtils.hasText(url) && url.trim().toLowerCase().startsWith("https://");
     }
 }
