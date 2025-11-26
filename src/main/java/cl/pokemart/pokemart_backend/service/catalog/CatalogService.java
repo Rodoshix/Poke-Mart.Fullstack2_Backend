@@ -238,8 +238,8 @@ public class CatalogService {
         ensureAdmin(current);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        if (discountPct == null || discountPct <= 0 || discountPct >= 100) {
-            throw new IllegalArgumentException("Descuento invalido");
+        if (discountPct == null || discountPct <= 0 || discountPct > 99) {
+            throw new IllegalArgumentException("Descuento invalido (1-99%)");
         }
         ProductOffer offer = ProductOffer.builder()
                 .product(product)
@@ -339,8 +339,8 @@ public class CatalogService {
     }
 
     private void validateDiscount(Integer discount) {
-        if (discount == null || discount <= 0 || discount >= 100) {
-            throw new IllegalArgumentException("Descuento invalido");
+        if (discount == null || discount <= 0 || discount > 99) {
+            throw new IllegalArgumentException("Descuento invalido (1-99%)");
         }
     }
 

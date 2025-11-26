@@ -80,12 +80,12 @@ public class DataInitializer implements CommandLineRunner {
     private void seedUsersAndCatalog() {
         try {
             userService.ensureUser(
-                    "admin@pokemart.cl",
+                    "admin@gmail.com",
                     "admin",
                     "admin123",
                     "Admin",
                     "Pokemart",
-                    "9.876.543-2",
+                    "88.888.888-8",
                     "Oficina Central Pokemart",
                     "Kanto",
                     "Ciudad Central",
@@ -369,9 +369,10 @@ public class DataInitializer implements CommandLineRunner {
         boolean exists = productOfferRepository.findActive(LocalDateTime.now()).stream()
                 .anyMatch(o -> o.getProduct().getId().equals(product.getId()));
         if (!exists) {
+            int safeDiscount = Math.min(99, Math.max(1, discountPct));
             productOfferRepository.save(ProductOffer.builder()
                     .product(product)
-                    .discountPct(discountPct)
+                    .discountPct(safeDiscount)
                     .endsAt(endsAt)
                     .active(true)
                     .build());

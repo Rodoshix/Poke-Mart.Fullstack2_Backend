@@ -162,9 +162,13 @@ public class OrderService {
         BigDecimal base = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
         if (offerOpt.isEmpty()) return base;
         int pct = offerOpt.get().getDiscountPct() != null ? offerOpt.get().getDiscountPct() : 0;
-        if (pct <= 0 || pct >= 100) return base;
+        if (pct <= 0 || pct > 99) return base;
         BigDecimal multiplier = BigDecimal.valueOf(100 - pct).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-        return base.multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal discounted = base.multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
+        if (discounted.compareTo(BigDecimal.ONE) < 0) {
+            return BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP);
+        }
+        return discounted;
     }
 
     private Optional<ProductOffer> findActiveOffer(Product product) {
