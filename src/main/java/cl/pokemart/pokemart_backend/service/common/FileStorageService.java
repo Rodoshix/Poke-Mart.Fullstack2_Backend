@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,6 +61,35 @@ public class FileStorageService {
 
         String url = "/uploads/" + filename;
         return new StoredFile(url, filename, file.getSize(), contentType);
+    }
+
+    /**
+     * Borra un archivo previamente subido si corresponde al directorio configurado.
+     * Retorna true si se borró, false si no aplicaba o no existía.
+     */
+    public boolean deleteByUrl(String imageUrl) {
+        if (!StringUtils.hasText(imageUrl)) {
+            return false;
+        }
+        try {
+            String pathPart = imageUrl;
+            if (imageUrl.startsWith("http")) {
+                pathPart = URI.create(imageUrl).getPath();
+            }
+            int lastSlash = pathPart.lastIndexOf('/');
+            if (lastSlash < 0 || lastSlash + 1 >= pathPart.length()) {
+                return false;
+            }
+            String filename = pathPart.substring(lastSlash + 1);
+            Path target = uploadDir.resolve(filename).normalize();
+            if (!target.startsWith(uploadDir)) {
+                return false;
+            }
+            return Files.deleteIfExists(target);
+        } catch (Exception e) {
+            // No propagar: si no se puede borrar, no bloquear la operación principal
+            return false;
+        }
     }
 
     private String resolveExtension(String originalFilename, String contentType) {
