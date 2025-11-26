@@ -10,6 +10,11 @@ API REST (Spring Boot) para la tienda Pokemart. Usa Oracle DB (wallet) y JWT par
 - `JWT_EXPIRATION_MS` / `JWT_REFRESH_EXPIRATION_MS` (opcionales)
 - `UPLOADS_DIR` (opcional, por defecto `uploads`)
 - `UPLOAD_MAX_FILE`, `UPLOAD_MAX_REQUEST` (opcionales)
+- **Mercado Pago (sandbox)**:
+  - `MERCADOPAGO_ACCESS_TOKEN`
+  - `MERCADOPAGO_INTEGRATOR_ID` (opcional)
+  - `MERCADOPAGO_NOTIFICATION_URL` (webhook público -> `/api/v1/payments/mp/webhook`)
+  - `MERCADOPAGO_SUCCESS_URL` / `MERCADOPAGO_FAILURE_URL` / `MERCADOPAGO_PENDING_URL` (redirecciones del checkout)
 
 Opcional: `SPRING_PROFILES_ACTIVE` para diferenciar dev/prod y `TNS_ADMIN` si lo pasas por variable de entorno.
 
@@ -36,5 +41,18 @@ Para desactivar o ajustar seeding, modifica `DataInitializer` o usa un perfil se
 2. Exporta `TNS_ADMIN` apuntando a esa carpeta (donde est�� `tnsnames.ora`).
 3. Define `DB_URL` usando el alias del wallet, por ejemplo `jdbc:oracle:thin:@pokemartbdd_high?TNS_ADMIN=/opt/oci/Wallet_PokeMartBDD` (ajusta la ruta en Windows). Variables requeridas: `DB_USERNAME`, `DB_PASSWORD`, `DB_DRIVER` (opcional si usas `oracle.jdbc.OracleDriver`).
 4. Define secretos de seguridad: `JWT_SECRET`, `JWT_EXPIRATION_MS`, `JWT_REFRESH_EXPIRATION_MS`.
-5. Configura uploads: crea el directorio configurado en `UPLOADS_DIR` (por defecto `uploads`) con permisos de escritura para el usuario que corre la app. En contenedores/OCI compute, monta un volumen o carpeta persistente y exp��rtala como `UPLOADS_DIR`.
+5. Configura uploads: crea el directorio configurado en `UPLOADS_DIR` (por defecto `uploads`) con permisos de escritura para el usuario que corre la app. En contenedores/OCI compute, monta un volumen o carpeta persistente y expórtala como `UPLOADS_DIR`.
 6. Asegura que el servicio tenga acceso al wallet (monta la carpeta o inyecta el zip descomprimido) y exporta las variables anteriores en el entorno antes de arrancar la app.
+
+## Mercado Pago (sandbox)
+Flujo implementado:
+- El frontend solicita `/api/v1/payments/mp/preference` con los datos de envío y carrito.
+- El backend crea una `preference` en Mercado Pago usando precios/stock de la BD y guarda un `PaymentIntent` (snapshot del pedido).
+- Mercado Pago redirige al usuario y envía notificaciones al webhook `/api/v1/payments/mp/webhook`.
+- Cuando el pago se marca `approved`, el backend crea la orden y descuenta stock; si se rechaza/cancela, no se crea la orden.
+
+Configura estas variables/propiedades antes de probar:
+- `MERCADOPAGO_ACCESS_TOKEN`: token sandbox.
+- `MERCADOPAGO_INTEGRATOR_ID` (opcional).
+- `MERCADOPAGO_NOTIFICATION_URL`: URL pública que apunte al webhook.
+- `MERCADOPAGO_SUCCESS_URL`, `MERCADOPAGO_FAILURE_URL`, `MERCADOPAGO_PENDING_URL`: rutas del frontend para redirecciones de MP.

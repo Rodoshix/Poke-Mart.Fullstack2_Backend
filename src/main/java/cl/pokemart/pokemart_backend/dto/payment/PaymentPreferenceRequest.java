@@ -1,4 +1,4 @@
-package cl.pokemart.pokemart_backend.dto.order;
+package cl.pokemart.pokemart_backend.dto.payment;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -7,14 +7,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Value;
-import lombok.With;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Value
-@With
-public class OrderRequest {
+public class PaymentPreferenceRequest {
     @NotBlank
     @Size(max = 120)
     String nombre;
@@ -37,11 +35,9 @@ public class OrderRequest {
     String departamento;
     @Size(max = 1000)
     String notas;
-    @Size(max = 60)
-    String metodoPago;
     @PositiveOrZero
     BigDecimal costoEnvio;
 
     @NotEmpty
-    List<@Valid OrderItemRequest> items;
+    List<@Valid PaymentItemRequest> items;
 }
