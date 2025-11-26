@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/access/public").permitAll()
+                        .requestMatchers("/api/v1/payments/mp/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**", "/api/v1/offers/**", "/api/v1/blogs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/offers/**", "/api/v1/admin/orders/**").hasAnyRole("ADMIN","VENDEDOR")
