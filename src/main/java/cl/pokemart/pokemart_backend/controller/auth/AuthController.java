@@ -4,12 +4,14 @@ import cl.pokemart.pokemart_backend.dto.auth.AuthResponse;
 import cl.pokemart.pokemart_backend.dto.auth.LoginRequest;
 import cl.pokemart.pokemart_backend.dto.auth.RefreshRequest;
 import cl.pokemart.pokemart_backend.dto.auth.RegisterRequest;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
 import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.security.JwtService;
 import cl.pokemart.pokemart_backend.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -33,10 +35,26 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Auth", description = "Autenticación y registro de usuarios")
 @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "401", description = "Credenciales inválidas / no autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Body invalido", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El correo es obligatorio",
+                          "path": "/api/v1/auth/register",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "401", description = "Credenciales inválidas / no autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Credenciales invalidas", value = ApiErrorExamples.AUTH_BAD_CREDENTIALS)
+        })),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Correo ya registrado", value = ApiErrorExamples.AUTH_CONFLICT)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
 })
 public class AuthController {
 

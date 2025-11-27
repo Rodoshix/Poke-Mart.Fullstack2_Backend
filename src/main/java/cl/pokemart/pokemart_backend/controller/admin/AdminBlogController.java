@@ -3,11 +3,13 @@ package cl.pokemart.pokemart_backend.controller.admin;
 import cl.pokemart.pokemart_backend.dto.blog.AdminBlogResponse;
 import cl.pokemart.pokemart_backend.dto.blog.BlogRequest;
 import cl.pokemart.pokemart_backend.dto.blog.BlogStatusRequest;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
 import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.blog.BlogStatus;
 import cl.pokemart.pokemart_backend.service.blog.BlogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,12 +37,40 @@ import java.util.List;
 @Tag(name = "Admin - Blogs", description = "Gestión de blogs (admin)")
 @PreAuthorize("hasRole('ADMIN')")
 @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Categoria invalida", value = ApiErrorExamples.BLOG_BAD_REQUEST)
+        })),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Sin token", value = """
+                        {
+                          "status": 401,
+                          "error": "Unauthorized",
+                          "message": "No autenticado",
+                          "path": "/api/v1/admin/blogs",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Rol insuficiente", value = ApiErrorExamples.OFFER_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Blog no existe", value = ApiErrorExamples.BLOG_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Slug duplicado", value = """
+                        {
+                          "status": 409,
+                          "error": "Conflict",
+                          "message": "Ya existe un blog con ese titulo/slug",
+                          "path": "/api/v1/admin/blogs",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
 })
 public class AdminBlogController {
 

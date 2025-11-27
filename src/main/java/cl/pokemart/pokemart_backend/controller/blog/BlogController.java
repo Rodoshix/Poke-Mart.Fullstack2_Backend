@@ -1,11 +1,15 @@
 package cl.pokemart.pokemart_backend.controller.blog;
 
 import cl.pokemart.pokemart_backend.dto.blog.BlogResponse;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.service.blog.BlogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +22,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/blogs")
 @Tag(name = "Blog", description = "Entradas de blog públicas")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Filtro invalido", value = ApiErrorExamples.BLOG_BAD_REQUEST)
+        })),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Blog no existe", value = ApiErrorExamples.BLOG_PUBLIC_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.BLOG_PUBLIC_ERROR)
+        }))
+})
 public class BlogController {
 
     private final BlogService blogService;

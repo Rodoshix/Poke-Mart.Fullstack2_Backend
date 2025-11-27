@@ -2,11 +2,13 @@ package cl.pokemart.pokemart_backend.controller.admin;
 
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
 import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.service.catalog.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -33,12 +35,40 @@ import java.util.List;
 @Tag(name = "Admin - Offers", description = "Gestión de ofertas (admin/vendedor)")
 @PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
 @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Descuento invalido", value = ApiErrorExamples.OFFER_BAD_REQUEST)
+        })),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Token faltante", value = """
+                        {
+                          "status": 401,
+                          "error": "Unauthorized",
+                          "message": "No autenticado",
+                          "path": "/api/v1/admin/offers",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Sin rol admin/vendedor", value = ApiErrorExamples.OFFER_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Oferta no existe", value = ApiErrorExamples.OFFER_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Producto ya tiene oferta", value = """
+                        {
+                          "status": 409,
+                          "error": "Conflict",
+                          "message": "El producto ya posee una oferta activa",
+                          "path": "/api/v1/admin/offers",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
 })
 public class AdminOfferController {
 
