@@ -110,7 +110,7 @@ public class DataInitializer implements CommandLineRunner {
 
             seedUsersFromJson("users.json");
             seedCatalogFromJson("productos.json", "ofertas.json");
-            seedReviewsFromJson("reviews.json");
+            seedReviewsFromJsonFlexible("reviews.json");
             seedBlogs();
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
@@ -436,7 +436,74 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private InputStream readResource(String path) {
+
+    /**
+     * Version flexible: asigna rese?as en orden del JSON a los productos activos ordenados por id,
+     * evitando depender de IDs fijos cuando las secuencias cambian tras truncar tablas.
+     */
+    private void seedReviewsFromJsonFlexible(String reviewsPath) {
+        try (InputStream is = readResource(reviewsPath)) {
+            if (is == null) {
+                log.warn("No se encontro reviews.json en {}", reviewsPath);
+                return;
+            }
+            Map<String, List<Map<String, Object>>> data = objectMapper.readValue(is, new TypeReference<>() {});
+            if (data == null || data.isEmpty()) {
+                log.info("reviews.json vacio, no se sembraron resenas");
+                return;
+            }
+            List<User> clients = userService.findAll().stream()
+                    .filter(u -> u.getRole() == Role.CLIENTE)
+                    .toList();
+            if (clients.isEmpty()) {
+                log.warn("No hay clientes para asociar resenas; se omite seed de reviews");
+                return;
+            }
+            List<Product> products = productRepository.findAllActive().stream()
+                    .sorted(java.util.Comparator.comparing(Product::getId))
+                    .toList();
+            if (products.isEmpty()) {
+                log.warn("No hay productos activos para seed de reviews");
+                return;
+            }
+
+            var reviewEntries = data.entrySet().stream().toList();
+            int clientIndex = 0;
+            for (int i = 0; i < reviewEntries.size() && i < products.size(); i++) {
+                Product product = products.get(i);
+                if (product == null) continue;
+                if (productReviewRepository.countByProductId(product.getId()) > 0) continue;
+                List<Map<String, Object>> reviews = reviewEntries.get(i).getValue();
+                if (reviews == null || reviews.isEmpty()) continue;
+
+                for (Map<String, Object> r : reviews) {
+                    User author = clients.get(clientIndex % clients.size());
+                    clientIndex++;
+                    Integer rating = ((Number) r.getOrDefault("rating", 5)).intValue();
+                    String comment = (String) r.getOrDefault("texto", "Sin comentario");
+                    LocalDate date = null;
+                    try {
+                        String fecha = (String) r.get("fecha");
+                        if (fecha != null) date = LocalDate.parse(fecha);
+                    } catch (Exception ignored) {}
+                    ProductReview review = ProductReview.builder()
+                            .product(product)
+                            .user(author)
+                            .authorName(author.getDisplayName())
+                            .rating(rating)
+                            .comment(comment)
+                            .createdAt(date != null ? date.atStartOfDay() : LocalDateTime.now())
+                            .build();
+                    productReviewRepository.save(review);
+                }
+            }
+            log.info("Seeded reviews desde reviews.json (flexible)");
+        } catch (Exception e) {
+            log.warn("Error sembrando resenas: {}", e.getMessage());
+        }
+    }
+
+        private InputStream readResource(String path) {
         try {
             ClassPathResource resource = new ClassPathResource(path);
             return resource.exists() ? resource.getInputStream() : null;
