@@ -1,10 +1,10 @@
-package cl.pokemart.pokemart_backend.dto.payment;
+﻿package cl.pokemart.pokemart_backend.dto.payment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Value;
 
@@ -12,32 +12,30 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Value
+@Schema(description = "Preferencia de pago para Mercado Pago")
 public class PaymentPreferenceRequest {
+    @Schema(description = "Titulo de la preferencia")
     @NotBlank
-    @Size(max = 120)
-    String nombre;
+    String title;
+    @Schema(description = "Moneda (ej: CLP)")
     @NotBlank
-    @Size(max = 120)
-    String apellido;
+    String currency;
+    @Schema(description = "URL de retorno al front")
     @NotBlank
-    @Email
-    String correo;
-    @Size(max = 50)
-    String telefono;
-    @Size(max = 120)
-    String region;
-    @Size(max = 120)
-    String comuna;
+    String backUrl;
+    @Schema(description = "Nombre del comprador")
     @NotBlank
-    @Size(max = 300)
-    String calle;
-    @Size(max = 300)
-    String departamento;
-    @Size(max = 1000)
-    String notas;
-    @PositiveOrZero
-    BigDecimal costoEnvio;
-
+    String buyerName;
+    @Schema(description = "Correo del comprador")
+    @NotBlank
+    String buyerEmail;
+    @Schema(description = "Total a pagar")
+    @NotNull
+    BigDecimal total;
+    @Schema(description = "Items incluidos en la preferencia")
     @NotEmpty
     List<@Valid PaymentItemRequest> items;
+    @Schema(description = "Descuento aplicado (opcional)")
+    @Size(max = 120)
+    String coupon;
 }
