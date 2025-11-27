@@ -100,7 +100,10 @@ public class PaymentService {
 
         var backUrls = buildBackUrls();
         if (backUrls != null) {
-            prefBuilder.backUrls(backUrls).autoReturn("approved");
+            prefBuilder.backUrls(backUrls);
+            if (isHttps(backUrls.getSuccess()) && isHttps(backUrls.getFailure()) && isHttps(backUrls.getPending())) {
+                prefBuilder.autoReturn("approved");
+            }
         }
 
         if (StringUtils.hasText(properties.getNotificationUrl())) {
@@ -325,8 +328,7 @@ public class PaymentService {
         String failure = properties.getFailureUrl();
         String pending = properties.getPendingUrl();
 
-        // Mercado Pago suele requerir https para auto_return; si no hay https, omitimos back_urls
-        if (!isHttps(success) || !isHttps(failure) || !isHttps(pending)) {
+        if (!StringUtils.hasText(success) || !StringUtils.hasText(failure) || !StringUtils.hasText(pending)) {
             return null;
         }
 
@@ -340,4 +342,5 @@ public class PaymentService {
     private boolean isHttps(String url) {
         return StringUtils.hasText(url) && url.trim().toLowerCase().startsWith("https://");
     }
+
 }
