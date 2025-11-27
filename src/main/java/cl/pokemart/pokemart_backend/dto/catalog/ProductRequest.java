@@ -1,4 +1,4 @@
-﻿package cl.pokemart.pokemart_backend.dto.catalog;
+package cl.pokemart.pokemart_backend.dto.catalog;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -37,3 +37,4 @@ public class ProductRequest {
     @Size(max = 120)
     String categoriaSlug;
 }
+

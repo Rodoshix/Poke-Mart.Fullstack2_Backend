@@ -1,4 +1,4 @@
-﻿package cl.pokemart.pokemart_backend.dto.catalog;
+package cl.pokemart.pokemart_backend.dto.catalog;
 
 import cl.pokemart.pokemart_backend.model.catalog.ProductReview;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,21 +7,21 @@ import lombok.Value;
 
 @Value
 @Builder
-@Schema(description = "Reseña gestionada desde admin")
+@Schema(description = "Rese?a gestionada desde admin")
 public class AdminReviewResponse {
-    @Schema(description = "ID de la reseña")
+    @Schema(description = "ID de la rese?a")
     Long id;
-    @Schema(description = "ID del producto reseñado")
+    @Schema(description = "ID del producto rese?ado")
     Long productId;
-    @Schema(description = "Nombre del producto reseñado")
+    @Schema(description = "Nombre del producto rese?ado")
     String productName;
     @Schema(description = "Rating otorgado (1-5)")
     Integer rating;
     @Schema(description = "Comentario")
     String comment;
-    @Schema(description = "Autor de la reseña")
+    @Schema(description = "Autor de la rese?a")
     String author;
-    @Schema(description = "Fecha de creación")
+    @Schema(description = "Fecha de creaci?n")
     String createdAt;
     @Schema(description = "Correo del autor (si existe)")
     String authorEmail;
@@ -39,3 +39,4 @@ public class AdminReviewResponse {
                 .build();
     }
 }
+

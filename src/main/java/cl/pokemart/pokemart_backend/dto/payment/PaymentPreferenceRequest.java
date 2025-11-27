@@ -1,4 +1,4 @@
-﻿package cl.pokemart.pokemart_backend.dto.payment;
+package cl.pokemart.pokemart_backend.dto.payment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -39,3 +39,4 @@ public class PaymentPreferenceRequest {
     @Size(max = 120)
     String coupon;
 }
+
