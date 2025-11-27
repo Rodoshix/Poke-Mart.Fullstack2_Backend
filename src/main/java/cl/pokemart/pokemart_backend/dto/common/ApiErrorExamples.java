@@ -175,4 +175,74 @@ public final class ApiErrorExamples {
               "timestamp": "2025-11-27T10:15:30Z"
             }
             """;
+
+    public static final String ORDER_PUBLIC_BAD_REQUEST = """
+            {
+              "status": 400,
+              "error": "Bad Request",
+              "message": "Carrito vacio o datos incompletos",
+              "path": "/api/v1/orders",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String ORDER_PUBLIC_UNAUTHORIZED = """
+            {
+              "status": 401,
+              "error": "Unauthorized",
+              "message": "Debes iniciar sesion para crear ordenes",
+              "path": "/api/v1/orders",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String PAYMENT_BAD_REQUEST = """
+            {
+              "status": 400,
+              "error": "Bad Request",
+              "message": "Preferencia de pago invalida",
+              "path": "/api/v1/payments/mp/preference",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String PAYMENT_NOT_FOUND = """
+            {
+              "status": 404,
+              "error": "Not Found",
+              "message": "Pago no encontrado o expirado",
+              "path": "/api/v1/payments/mp/confirm",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String PAYMENT_CONFLICT = """
+            {
+              "status": 409,
+              "error": "Conflict",
+              "message": "El pago ya fue procesado",
+              "path": "/api/v1/payments/mp/confirm",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String REVIEW_FORBIDDEN = """
+            {
+              "status": 403,
+              "error": "Forbidden",
+              "message": "Debes iniciar sesion para reseñar",
+              "path": "/api/v1/products/1/reviews",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
+
+    public static final String REVIEW_NOT_FOUND = """
+            {
+              "status": 404,
+              "error": "Not Found",
+              "message": "Producto no encontrado",
+              "path": "/api/v1/products/999/reviews",
+              "timestamp": "2025-11-27T10:15:30Z"
+            }
+            """;
 }

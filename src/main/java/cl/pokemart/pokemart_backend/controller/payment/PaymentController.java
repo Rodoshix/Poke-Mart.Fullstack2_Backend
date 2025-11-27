@@ -1,5 +1,7 @@
 package cl.pokemart.pokemart_backend.controller.payment;
 
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationRequest;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentConfirmationResponse;
 import cl.pokemart.pokemart_backend.dto.payment.PaymentPreferenceRequest;
@@ -8,8 +10,10 @@ import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.service.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +25,23 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/payments/mp")
 @Tag(name = "Payments", description = "Integración con Mercado Pago")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Preferencia invalida", value = ApiErrorExamples.PAYMENT_BAD_REQUEST)
+        })),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Token faltante", value = ApiErrorExamples.PROFILE_UNAUTHORIZED)
+        })),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Pago no existe", value = ApiErrorExamples.PAYMENT_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Pago ya procesado", value = ApiErrorExamples.PAYMENT_CONFLICT)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
+})
 public class PaymentController {
 
     private final PaymentService paymentService;

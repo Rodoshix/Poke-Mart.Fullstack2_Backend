@@ -2,12 +2,14 @@ package cl.pokemart.pokemart_backend.controller.catalog;
 
 import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
 import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.service.catalog.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,12 +34,32 @@ import java.util.List;
 @RequestMapping("/api/v1/products")
 @Tag(name = "Product", description = "Catálogo público y gestión de productos")
 @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Solicitud invalida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "404", description = "Recurso no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        @ApiResponse(responseCode = "400", description = "Solicitud invalida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Categoria invalida", value = ApiErrorExamples.BLOG_BAD_REQUEST)
+        })),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Sin token", value = ApiErrorExamples.PROFILE_UNAUTHORIZED)
+        })),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Rol insuficiente", value = ApiErrorExamples.OFFER_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "404", description = "Recurso no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Producto no existe", value = ApiErrorExamples.REVIEW_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Nombre duplicado", value = """
+                        {
+                          "status": 409,
+                          "error": "Conflict",
+                          "message": "Ya existe un producto con ese nombre",
+                          "path": "/api/v1/products",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
 })
 public class ProductController {
 
