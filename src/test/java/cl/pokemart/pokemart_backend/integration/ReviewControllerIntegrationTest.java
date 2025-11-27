@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,5 +47,22 @@ class ReviewControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(0)));
+    }
+
+    @Test
+    void shouldRejectReviewWithoutAuth() throws Exception {
+        String payload = """
+                {
+                  "rating": 5,
+                  "comment": "Excelente"
+                }
+                """;
+        mockMvc.perform(post("/api/v1/products/{id}/reviews", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(result -> {
+                    int s = result.getResponse().getStatus();
+                    org.assertj.core.api.Assertions.assertThat(s).isIn(401, 403);
+                });
     }
 }
