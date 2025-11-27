@@ -45,6 +45,8 @@ public class CatalogService {
     private final OrderItemRepository orderItemRepository;
     private final ProductReviewRepository productReviewRepository;
     private final FileStorageService fileStorageService;
+    private final java.util.concurrent.ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> productsCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = 60_000; // 60s
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
@@ -65,13 +67,19 @@ public class CatalogService {
     // Public
     @Transactional(readOnly = true)
     public List<ProductResponse> listProducts(String categorySlug) {
+        String cacheKey = StringUtils.hasText(categorySlug) ? "cat:" + categorySlug.toLowerCase() : "all";
+        List<ProductResponse> cached = getCache(cacheKey);
+        if (cached != null) return cached;
+
         List<Product> products = StringUtils.hasText(categorySlug)
                 ? productRepository.findActiveByCategory(categorySlug)
                 : productRepository.findAllActive();
         var offers = productOfferRepository.findActive(LocalDateTime.now());
-        return products.stream()
+        List<ProductResponse> response = products.stream()
                 .map(p -> mapToResponse(p, findOfferForProduct(p, offers), null))
                 .toList();
+        putCache(cacheKey, response);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -137,6 +145,8 @@ public class CatalogService {
                 .authorName(current.getDisplayName())
                 .build();
         ProductReview saved = productReviewRepository.save(review);
+        updateReviewStats(product.getId());
+        invalidateProductsCache();
         return ReviewResponse.from(saved);
     }
 
@@ -171,12 +181,15 @@ public class CatalogService {
                 .price(request.getPrecio() != null ? request.getPrecio() : BigDecimal.ZERO)
                 .stock(request.getStock() != null ? request.getStock() : 0)
                 .imageUrl(imageValue)
+                .reviewCount(0L)
+                .reviewAvg(0.0)
                 .category(category)
                 .active(true)
                 .build();
 
         Product saved = productRepository.save(product);
         ensureStockBase(saved, request.getStockBase());
+        invalidateProductsCache();
         return mapToResponse(saved, Optional.empty(), null);
     }
 
@@ -205,6 +218,7 @@ public class CatalogService {
             fileStorageService.deleteByUrl(previousImageUrl);
         }
 
+        invalidateProductsCache();
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())), null);
     }
 
@@ -213,6 +227,7 @@ public class CatalogService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         product.setActive(active);
+        invalidateProductsCache();
         return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())), null);
     }
 
@@ -237,6 +252,7 @@ public class CatalogService {
         }
         productRepository.delete(product);
         fileStorageService.deleteByUrl(imageUrl);
+        invalidateProductsCache();
     }
 
     public ProductResponse addOffer(Long productId, Integer discountPct, LocalDateTime endsAt, User current) {
@@ -253,6 +269,7 @@ public class CatalogService {
                 .active(true)
                 .build();
         productOfferRepository.save(offer);
+        invalidateProductsCache();
         return mapToResponse(product, Optional.of(offer), null);
     }
 
@@ -286,6 +303,7 @@ public class CatalogService {
         if (request.getActive() != null) {
             offer.setActive(request.getActive());
         }
+        invalidateProductsCache();
         return AdminOfferResponse.from(offer);
     }
 
@@ -306,12 +324,18 @@ public class CatalogService {
         } else {
             offer.setActive(false);
         }
+        invalidateProductsCache();
     }
 
     public void deleteReview(Long id) {
         var review = productReviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Review no encontrada"));
+        Long productId = review.getProduct() != null ? review.getProduct().getId() : null;
         productReviewRepository.delete(review);
+        if (productId != null) {
+            updateReviewStats(productId);
+            invalidateProductsCache();
+        }
     }
 
     // Helpers
@@ -387,15 +411,12 @@ public class CatalogService {
         Integer stockBase = productStockBaseRepository.findByProductId(product.getId())
                 .map(ProductStockBase::getStockBase)
                 .orElse(null);
-        long reviewCount = 0;
-        double reviewAvg = 0.0;
+        long reviewCount = product.getReviewCount() != null ? product.getReviewCount() : 0L;
+        double reviewAvg = product.getReviewAvg() != null ? product.getReviewAvg() : 0.0;
         if (statsMap != null && statsMap.containsKey(product.getId())) {
             var stats = statsMap.get(product.getId());
             reviewCount = stats.count();
             reviewAvg = stats.avg();
-        } else {
-            reviewCount = productReviewRepository.countByProductId(product.getId());
-            reviewAvg = productReviewRepository.averageRating(product.getId()).orElse(0.0);
         }
         return ProductResponse.builder()
                 .id(product.getId())
@@ -433,6 +454,38 @@ public class CatalogService {
         stockBase.setStockBase(base);
         productStockBaseRepository.save(stockBase);
     }
+
+    private void updateReviewStats(Long productId) {
+        long count = productReviewRepository.countByProductId(productId);
+        double avg = productReviewRepository.averageRating(productId).orElse(0.0);
+        productRepository.findById(productId).ifPresent(p -> {
+            p.setReviewCount(count);
+            p.setReviewAvg(avg);
+            productRepository.save(p);
+        });
+    }
+
+    private void invalidateProductsCache() {
+        productsCache.clear();
+    }
+
+    private List<ProductResponse> getCache(String key) {
+        CacheEntry<List<ProductResponse>> entry = productsCache.get(key);
+        if (entry == null) return null;
+        if (entry.expiresAt < System.currentTimeMillis()) {
+            productsCache.remove(key);
+            return null;
+        }
+        return entry.value;
+    }
+
+    private void putCache(String key, List<ProductResponse> value) {
+        productsCache.put(key, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MS));
+    }
+
+    private record CacheEntry<T>(T value, long expiresAt) {}
+
+    private record ReviewStats(long count, double avg) {}
 }
 
 

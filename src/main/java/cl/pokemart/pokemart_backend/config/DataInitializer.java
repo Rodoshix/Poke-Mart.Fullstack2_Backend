@@ -363,6 +363,8 @@ public class DataInitializer implements CommandLineRunner {
                         .imageUrl(normalizedImage)
                         .price(price)
                         .stock(stock)
+                        .reviewCount(0L)
+                        .reviewAvg(0.0)
                         .active(true)
                         .build()));
         productStockBaseRepository.findByProduct(product)
@@ -506,8 +508,25 @@ public class DataInitializer implements CommandLineRunner {
                 }
             }
             log.info("Seeded reviews desde reviews.json (flexible)");
+            recalcReviewStats();
         } catch (Exception e) {
             log.warn("Error sembrando resenas: {}", e.getMessage());
+        }
+    }
+
+    private void recalcReviewStats() {
+        try {
+            List<Product> products = productRepository.findAll();
+            for (Product p : products) {
+                long count = productReviewRepository.countByProductId(p.getId());
+                double avg = productReviewRepository.averageRating(p.getId()).orElse(0.0);
+                p.setReviewCount(count);
+                p.setReviewAvg(avg);
+                productRepository.save(p);
+            }
+            log.info("Sincronizados reviewCount/reviewAvg en productos");
+        } catch (Exception e) {
+            log.warn("No se pudieron sincronizar stats de reviews: {}", e.getMessage());
         }
     }
 
