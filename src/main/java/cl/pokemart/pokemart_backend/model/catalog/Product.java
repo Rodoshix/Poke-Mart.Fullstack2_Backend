@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -48,7 +49,8 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(name = "image_url", length = 500)
+    @Lob
+    @Column(name = "image_url", columnDefinition = "CLOB")
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

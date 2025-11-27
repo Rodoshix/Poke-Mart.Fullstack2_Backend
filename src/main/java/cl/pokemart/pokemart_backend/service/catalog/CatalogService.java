@@ -161,13 +161,14 @@ public class CatalogService {
     public ProductResponse createProduct(ProductRequest request, User current) {
         ensureAdmin(current);
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
+        String imageValue = normalizeImage(request.getImagenUrl());
 
         Product product = Product.builder()
                 .name(request.getNombre())
                 .description(request.getDescripcion())
                 .price(request.getPrecio() != null ? request.getPrecio() : BigDecimal.ZERO)
                 .stock(request.getStock() != null ? request.getStock() : 0)
-                .imageUrl(request.getImagenUrl())
+                .imageUrl(imageValue)
                 .category(category)
                 .active(true)
                 .build();
@@ -184,19 +185,21 @@ public class CatalogService {
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
 
         String previousImageUrl = product.getImageUrl();
+        String imageValue = normalizeImage(request.getImagenUrl());
         product.setName(request.getNombre());
         product.setDescription(request.getDescripcion());
         product.setPrice(request.getPrecio());
         product.setStock(request.getStock());
-        product.setImageUrl(request.getImagenUrl());
+        product.setImageUrl(imageValue);
         product.setCategory(category);
         if (request.getStockBase() != null) {
             ensureStockBase(product, request.getStockBase());
         }
-        // Si la imagen cambió, intenta borrar la anterior para no dejar archivos huérfanos
+        // Si la imagen cambió, intenta borrar la anterior para no dejar archivos huérfanos (solo si era un archivo/URL)
         if (StringUtils.hasText(previousImageUrl)
-                && request.getImagenUrl() != null
-                && !previousImageUrl.equals(request.getImagenUrl())) {
+                && imageValue != null
+                && !previousImageUrl.equals(imageValue)
+                && !isDataUrl(previousImageUrl)) {
             fileStorageService.deleteByUrl(previousImageUrl);
         }
 
@@ -387,6 +390,18 @@ public class CatalogService {
                 .reviewAvg(reviewAvg)
                 .active(product.getActive())
                 .build();
+    }
+
+    private String normalizeImage(String raw) {
+        if (!StringUtils.hasText(raw)) return null;
+        String value = raw.trim();
+        return value;
+    }
+
+    private boolean isDataUrl(String value) {
+        if (!StringUtils.hasText(value)) return false;
+        String v = value.trim().toLowerCase();
+        return v.startsWith("data:");
     }
 
     private void ensureStockBase(Product product, Integer stockBaseValue) {

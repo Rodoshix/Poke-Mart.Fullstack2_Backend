@@ -22,7 +22,6 @@ public class ProductRequest {
     Integer stock;
     @Min(0)
     Integer stockBase;
-    @Size(max = 500)
     String imagenUrl;
     @NotBlank
     @Size(max = 120)
