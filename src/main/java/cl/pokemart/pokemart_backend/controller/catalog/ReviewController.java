@@ -2,12 +2,16 @@ package cl.pokemart.pokemart_backend.controller.catalog;
 
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewResponse;
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.service.catalog.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +28,31 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/products/{productId}/reviews")
 @Tag(name = "Reviews", description = "Reseñas públicas por producto")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud invalida", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Body invalido", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El comentario es obligatorio",
+                          "path": "/api/v1/products/1/reviews",
+                          "timestamp": "2025-11-27T10:15:30Z"
+                        }
+                        """)
+        })),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Sin token", value = ApiErrorExamples.REVIEW_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "No autorizado", value = ApiErrorExamples.REVIEW_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Producto no existe", value = ApiErrorExamples.REVIEW_NOT_FOUND)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
+})
 public class ReviewController {
 
     private final CatalogService catalogService;

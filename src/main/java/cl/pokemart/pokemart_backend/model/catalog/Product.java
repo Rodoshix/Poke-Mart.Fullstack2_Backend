@@ -48,8 +48,14 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
+
+    @Column(name = "review_count", nullable = false)
+    private Long reviewCount;
+
+    @Column(name = "review_avg", nullable = false)
+    private Double reviewAvg;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
@@ -74,6 +80,8 @@ public class Product {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        if (this.reviewCount == null) this.reviewCount = 0L;
+        if (this.reviewAvg == null) this.reviewAvg = 0.0;
     }
 
     @PreUpdate

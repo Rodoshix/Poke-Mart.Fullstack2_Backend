@@ -23,11 +23,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
@@ -37,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -52,6 +57,8 @@ public class DataInitializer implements CommandLineRunner {
     private final OrderService orderService;
     private final BlogService blogService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${app.uploads.dir:uploads}")
+    private String uploadsDir;
 
     public DataInitializer(UserService userService,
                            CategoryRepository categoryRepository,
@@ -110,7 +117,7 @@ public class DataInitializer implements CommandLineRunner {
 
             seedUsersFromJson("users.json");
             seedCatalogFromJson("productos.json", "ofertas.json");
-            seedReviewsFromJson("reviews.json");
+            seedReviewsFromJsonFlexible("reviews.json");
             seedBlogs();
         } catch (Exception e) {
             log.warn("Seed general falló: {}", e.getMessage());
@@ -345,6 +352,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Product ensureProduct(String name, String description, Category category, String imageUrl, BigDecimal price, int stock) {
+        String normalizedImage = persistImageSeed(imageUrl, name);
         Product product = productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst()
@@ -352,9 +360,11 @@ public class DataInitializer implements CommandLineRunner {
                         .name(name)
                         .description(description)
                         .category(category)
-                        .imageUrl(imageUrl)
+                        .imageUrl(normalizedImage)
                         .price(price)
                         .stock(stock)
+                        .reviewCount(0L)
+                        .reviewAvg(0.0)
                         .active(true)
                         .build()));
         productStockBaseRepository.findByProduct(product)
@@ -436,12 +446,132 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+
+    /**
+     * Version flexible: asigna rese?as en orden del JSON a los productos activos ordenados por id,
+     * evitando depender de IDs fijos cuando las secuencias cambian tras truncar tablas.
+     */
+    private void seedReviewsFromJsonFlexible(String reviewsPath) {
+        try (InputStream is = readResource(reviewsPath)) {
+            if (is == null) {
+                log.warn("No se encontro reviews.json en {}", reviewsPath);
+                return;
+            }
+            Map<String, List<Map<String, Object>>> data = objectMapper.readValue(is, new TypeReference<>() {});
+            if (data == null || data.isEmpty()) {
+                log.info("reviews.json vacio, no se sembraron resenas");
+                return;
+            }
+            List<User> clients = userService.findAll().stream()
+                    .filter(u -> u.getRole() == Role.CLIENTE)
+                    .toList();
+            if (clients.isEmpty()) {
+                log.warn("No hay clientes para asociar resenas; se omite seed de reviews");
+                return;
+            }
+            List<Product> products = productRepository.findAllActive().stream()
+                    .sorted(java.util.Comparator.comparing(Product::getId))
+                    .toList();
+            if (products.isEmpty()) {
+                log.warn("No hay productos activos para seed de reviews");
+                return;
+            }
+
+            var reviewEntries = data.entrySet().stream().toList();
+            int clientIndex = 0;
+            for (int i = 0; i < reviewEntries.size() && i < products.size(); i++) {
+                Product product = products.get(i);
+                if (product == null) continue;
+                if (productReviewRepository.countByProductId(product.getId()) > 0) continue;
+                List<Map<String, Object>> reviews = reviewEntries.get(i).getValue();
+                if (reviews == null || reviews.isEmpty()) continue;
+
+                for (Map<String, Object> r : reviews) {
+                    User author = clients.get(clientIndex % clients.size());
+                    clientIndex++;
+                    Integer rating = ((Number) r.getOrDefault("rating", 5)).intValue();
+                    String comment = (String) r.getOrDefault("texto", "Sin comentario");
+                    LocalDate date = null;
+                    try {
+                        String fecha = (String) r.get("fecha");
+                        if (fecha != null) date = LocalDate.parse(fecha);
+                    } catch (Exception ignored) {}
+                    ProductReview review = ProductReview.builder()
+                            .product(product)
+                            .user(author)
+                            .authorName(author.getDisplayName())
+                            .rating(rating)
+                            .comment(comment)
+                            .createdAt(date != null ? date.atStartOfDay() : LocalDateTime.now())
+                            .build();
+                    productReviewRepository.save(review);
+                }
+            }
+            log.info("Seeded reviews desde reviews.json (flexible)");
+            recalcReviewStats();
+        } catch (Exception e) {
+            log.warn("Error sembrando resenas: {}", e.getMessage());
+        }
+    }
+
+    private void recalcReviewStats() {
+        try {
+            List<Product> products = productRepository.findAll();
+            for (Product p : products) {
+                long count = productReviewRepository.countByProductId(p.getId());
+                double avg = productReviewRepository.averageRating(p.getId()).orElse(0.0);
+                p.setReviewCount(count);
+                p.setReviewAvg(avg);
+                productRepository.save(p);
+            }
+            log.info("Sincronizados reviewCount/reviewAvg en productos");
+        } catch (Exception e) {
+            log.warn("No se pudieron sincronizar stats de reviews: {}", e.getMessage());
+        }
+    }
+
     private InputStream readResource(String path) {
         try {
             ClassPathResource resource = new ClassPathResource(path);
             return resource.exists() ? resource.getInputStream() : null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private String persistImageSeed(String rawImage, String nameHint) {
+        if (rawImage == null || rawImage.isBlank()) return null;
+        String value = rawImage.trim();
+        // Si ya es URL pública o /uploads, devolver tal cual
+        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/uploads/")) {
+            return value;
+        }
+        try {
+            Path baseDir = Paths.get(uploadsDir).toAbsolutePath().normalize().resolve("products");
+            Files.createDirectories(baseDir);
+
+            String ext = "png";
+            String data = value;
+            if (value.startsWith("data:")) {
+                int comma = value.indexOf(',');
+                if (comma > 0) {
+                    String meta = value.substring(5, comma);
+                    if (meta.contains("jpeg") || meta.contains("jpg")) ext = "jpg";
+                    else if (meta.contains("webp")) ext = "webp";
+                    data = value.substring(comma + 1);
+                }
+            } else if (value.contains("base64,")) {
+                data = value.substring(value.indexOf("base64,") + 7);
+            }
+            byte[] bytes = java.util.Base64.getDecoder().decode(data);
+            String safeName = slugify(nameHint != null ? nameHint : UUID.randomUUID().toString());
+            String filename = safeName + "-" + UUID.randomUUID() + "." + ext;
+            Path target = baseDir.resolve(filename);
+            Files.write(target, bytes);
+            return "/uploads/products/" + filename;
+        } catch (Exception e) {
+            log.warn("No se pudo persistir imagen seed, se deja valor original: {}", e.getMessage());
+            return value;
         }
     }
 

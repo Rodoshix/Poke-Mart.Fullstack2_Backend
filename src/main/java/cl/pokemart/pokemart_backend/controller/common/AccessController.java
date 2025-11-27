@@ -1,6 +1,13 @@
 package cl.pokemart.pokemart_backend.controller.common;
 
+import cl.pokemart.pokemart_backend.dto.common.ApiErrorExamples;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -13,9 +20,21 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/access")
 @Tag(name = "Access", description = "Pings de acceso público/rol para probar autenticación")
+@ApiResponses({
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Sin token", value = ApiErrorExamples.PROFILE_UNAUTHORIZED)
+        })),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Rol insuficiente", value = ApiErrorExamples.OFFER_FORBIDDEN)
+        })),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                @ExampleObject(name = "Fallo interno", value = ApiErrorExamples.PUBLIC_OFFERS_ERROR)
+        }))
+})
 public class AccessController {
 
     @Operation(summary = "Ping público", description = "Endpoint público de prueba.")
+    @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping("/public")
     public Map<String, Object> publicPing() {
         return Map.of("status", "ok", "scope", "public");

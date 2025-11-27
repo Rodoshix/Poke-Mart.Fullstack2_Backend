@@ -1,24 +1,24 @@
 package cl.pokemart.pokemart_backend.service.catalog;
 
-import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
-import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.AdminReviewResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
+import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewResponse;
-import cl.pokemart.pokemart_backend.dto.catalog.AdminReviewResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
-import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.catalog.ProductReview;
+import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
-import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
 import cl.pokemart.pokemart_backend.service.common.FileStorageService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,9 +28,12 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -43,6 +46,9 @@ public class CatalogService {
     private final OrderItemRepository orderItemRepository;
     private final ProductReviewRepository productReviewRepository;
     private final FileStorageService fileStorageService;
+
+    private static final long CACHE_TTL_MS = 60_000; // 60s
+    private final ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> productsCache = new ConcurrentHashMap<>();
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
@@ -60,34 +66,22 @@ public class CatalogService {
         this.fileStorageService = fileStorageService;
     }
 
-    // Public
+    // Public catalog
     @Transactional(readOnly = true)
     public List<ProductResponse> listProducts(String categorySlug) {
+        String cacheKey = StringUtils.hasText(categorySlug) ? "cat:" + categorySlug.toLowerCase() : "all";
+        List<ProductResponse> cached = getCache(cacheKey);
+        if (cached != null) return cached;
+
         List<Product> products = StringUtils.hasText(categorySlug)
                 ? productRepository.findActiveByCategory(categorySlug)
                 : productRepository.findAllActive();
         var offers = productOfferRepository.findActive(LocalDateTime.now());
-        return products.stream()
-                .map(p -> mapToResponse(p, findOfferForProduct(p, offers)))
+        List<ProductResponse> response = products.stream()
+                .map(p -> mapToResponse(p, findOfferForProduct(p, offers), null))
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
-        ensureManager(current);
-        List<ProductOffer> offers = includeInactive ? productOfferRepository.findAll() : productOfferRepository.findActive(LocalDateTime.now());
-        return offers.stream()
-                .filter(o -> isOfferVisibleForUser(o, current))
-                .map(AdminOfferResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public AdminOfferResponse getOfferForManagement(Long id, User current) {
-        ensureManager(current);
-        ProductOffer offer = productOfferRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        return AdminOfferResponse.from(offer);
+        putCache(cacheKey, response);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -95,7 +89,7 @@ public class CatalogService {
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return offers.stream()
                 .filter(o -> o.getProduct() != null && Boolean.TRUE.equals(o.getProduct().getActive()))
-                .map(o -> mapToResponse(o.getProduct(), Optional.of(o)))
+                .map(o -> mapToResponse(o.getProduct(), Optional.of(o), null))
                 .toList();
     }
 
@@ -104,7 +98,7 @@ public class CatalogService {
         Product product = productRepository.findActiveById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         var offers = productOfferRepository.findActive(LocalDateTime.now());
-        return mapToResponse(product, findOfferForProduct(product, offers));
+        return mapToResponse(product, findOfferForProduct(product, offers), null);
     }
 
     @Transactional(readOnly = true)
@@ -135,16 +129,19 @@ public class CatalogService {
                 .authorName(current.getDisplayName())
                 .build();
         ProductReview saved = productReviewRepository.save(review);
+        updateReviewStats(product.getId());
+        invalidateProductsCache();
         return ReviewResponse.from(saved);
     }
 
+    // Management (admin/vendedor)
     @Transactional(readOnly = true)
     public List<ProductResponse> listProductsForManagement(boolean includeInactive, User current) {
         ensureManager(current);
         List<Product> products = includeInactive ? productRepository.findAll() : productRepository.findAllActive();
         var offers = productOfferRepository.findActive(LocalDateTime.now());
         return products.stream()
-                .map(p -> mapToResponse(p, findOfferForProduct(p, offers)))
+                .map(p -> mapToResponse(p, findOfferForProduct(p, offers), null))
                 .toList();
     }
 
@@ -154,27 +151,51 @@ public class CatalogService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         var offers = productOfferRepository.findActive(LocalDateTime.now());
-        return mapToResponse(product, findOfferForProduct(product, offers));
+        return mapToResponse(product, findOfferForProduct(product, offers), null);
     }
 
-    // Admin/Vendedor
+    @Transactional(readOnly = true)
+    public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
+        ensureManager(current);
+        List<ProductOffer> offers = includeInactive
+                ? productOfferRepository.findAll()
+                : productOfferRepository.findActive(LocalDateTime.now());
+        return offers.stream()
+                .filter(o -> isOfferVisibleForUser(o, current))
+                .map(AdminOfferResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminOfferResponse getOfferForManagement(Long id, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        return AdminOfferResponse.from(offer);
+    }
+
+    // Admin operations
     public ProductResponse createProduct(ProductRequest request, User current) {
         ensureAdmin(current);
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
+        String imageValue = normalizeImage(request.getImagenUrl());
 
         Product product = Product.builder()
                 .name(request.getNombre())
                 .description(request.getDescripcion())
                 .price(request.getPrecio() != null ? request.getPrecio() : BigDecimal.ZERO)
                 .stock(request.getStock() != null ? request.getStock() : 0)
-                .imageUrl(request.getImagenUrl())
+                .imageUrl(imageValue)
+                .reviewCount(0L)
+                .reviewAvg(0.0)
                 .category(category)
                 .active(true)
                 .build();
 
         Product saved = productRepository.save(product);
         ensureStockBase(saved, request.getStockBase());
-        return mapToResponse(saved, Optional.empty());
+        invalidateProductsCache();
+        return mapToResponse(saved, Optional.empty(), null);
     }
 
     public ProductResponse updateProduct(Long id, ProductRequest request, User current) {
@@ -184,23 +205,25 @@ public class CatalogService {
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
 
         String previousImageUrl = product.getImageUrl();
+        String imageValue = normalizeImage(request.getImagenUrl());
         product.setName(request.getNombre());
         product.setDescription(request.getDescripcion());
         product.setPrice(request.getPrecio());
         product.setStock(request.getStock());
-        product.setImageUrl(request.getImagenUrl());
+        product.setImageUrl(imageValue);
         product.setCategory(category);
         if (request.getStockBase() != null) {
             ensureStockBase(product, request.getStockBase());
         }
-        // Si la imagen cambió, intenta borrar la anterior para no dejar archivos huérfanos
         if (StringUtils.hasText(previousImageUrl)
-                && request.getImagenUrl() != null
-                && !previousImageUrl.equals(request.getImagenUrl())) {
+                && imageValue != null
+                && !previousImageUrl.equals(imageValue)
+                && !isDataUrl(previousImageUrl)) {
             fileStorageService.deleteByUrl(previousImageUrl);
         }
 
-        return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
+        invalidateProductsCache();
+        return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())), null);
     }
 
     public ProductResponse setProductActive(Long id, boolean active, User current) {
@@ -208,7 +231,8 @@ public class CatalogService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
         product.setActive(active);
-        return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())));
+        invalidateProductsCache();
+        return mapToResponse(product, findOfferForProduct(product, productOfferRepository.findActive(LocalDateTime.now())), null);
     }
 
     public void deleteProduct(Long id, User current, boolean hardDelete) {
@@ -218,6 +242,7 @@ public class CatalogService {
         String imageUrl = product.getImageUrl();
         if (!hardDelete) {
             product.setActive(false);
+            invalidateProductsCache();
             return;
         }
         var offers = productOfferRepository.findByProduct(product);
@@ -232,15 +257,14 @@ public class CatalogService {
         }
         productRepository.delete(product);
         fileStorageService.deleteByUrl(imageUrl);
+        invalidateProductsCache();
     }
 
     public ProductResponse addOffer(Long productId, Integer discountPct, LocalDateTime endsAt, User current) {
         ensureAdmin(current);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        if (discountPct == null || discountPct <= 0 || discountPct > 99) {
-            throw new IllegalArgumentException("Descuento invalido (1-99%)");
-        }
+        validateDiscount(discountPct);
         ProductOffer offer = ProductOffer.builder()
                 .product(product)
                 .discountPct(discountPct)
@@ -248,7 +272,8 @@ public class CatalogService {
                 .active(true)
                 .build();
         productOfferRepository.save(offer);
-        return mapToResponse(product, Optional.of(offer));
+        invalidateProductsCache();
+        return mapToResponse(product, Optional.of(offer), null);
     }
 
     public AdminOfferResponse createOffer(AdminOfferRequest request, User current) {
@@ -263,6 +288,7 @@ public class CatalogService {
                 .active(request.getActive() == null ? true : request.getActive())
                 .build();
         ProductOffer saved = productOfferRepository.save(offer);
+        invalidateProductsCache();
         return AdminOfferResponse.from(saved);
     }
 
@@ -281,6 +307,7 @@ public class CatalogService {
         if (request.getActive() != null) {
             offer.setActive(request.getActive());
         }
+        invalidateProductsCache();
         return AdminOfferResponse.from(offer);
     }
 
@@ -289,6 +316,7 @@ public class CatalogService {
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
         offer.setActive(active);
+        invalidateProductsCache();
         return AdminOfferResponse.from(offer);
     }
 
@@ -301,12 +329,18 @@ public class CatalogService {
         } else {
             offer.setActive(false);
         }
+        invalidateProductsCache();
     }
 
     public void deleteReview(Long id) {
         var review = productReviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Review no encontrada"));
+        Long productId = review.getProduct() != null ? review.getProduct().getId() : null;
         productReviewRepository.delete(review);
+        if (productId != null) {
+            updateReviewStats(productId);
+            invalidateProductsCache();
+        }
     }
 
     // Helpers
@@ -355,10 +389,22 @@ public class CatalogService {
 
     private Optional<ProductOffer> findOfferForProduct(Product product, List<ProductOffer> offers) {
         if (offers == null) return Optional.empty();
-        return offers.stream().filter(o -> o.getProduct().getId().equals(product.getId()) && !o.isExpired()).findFirst();
+        return offers.stream()
+                .filter(o -> o.getProduct().getId().equals(product.getId()) && !o.isExpired())
+                .findFirst();
     }
 
-    private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt) {
+    private Map<Long, ReviewStats> aggregateReviewStats(List<Product> products) {
+        if (products == null || products.isEmpty()) return Map.of();
+        List<Long> ids = products.stream().map(Product::getId).toList();
+        return productReviewRepository.aggregateByProductIds(ids).stream()
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> new ReviewStats(((Number) row[1]).longValue(), row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)
+                ));
+    }
+
+    private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt, Map<Long, ReviewStats> statsMap) {
         ProductResponse.OfferInfo offerInfo = null;
         if (offerOpt.isPresent() && !offerOpt.get().isExpired()) {
             var o = offerOpt.get();
@@ -370,8 +416,13 @@ public class CatalogService {
         Integer stockBase = productStockBaseRepository.findByProductId(product.getId())
                 .map(ProductStockBase::getStockBase)
                 .orElse(null);
-        long reviewCount = productReviewRepository.countByProductId(product.getId());
-        double reviewAvg = productReviewRepository.averageRating(product.getId()).orElse(0.0);
+        long reviewCount = product.getReviewCount() != null ? product.getReviewCount() : 0L;
+        double reviewAvg = product.getReviewAvg() != null ? product.getReviewAvg() : 0.0;
+        if (statsMap != null && statsMap.containsKey(product.getId())) {
+            var stats = statsMap.get(product.getId());
+            reviewCount = stats.count();
+            reviewAvg = stats.avg();
+        }
         return ProductResponse.builder()
                 .id(product.getId())
                 .nombre(product.getName())
@@ -389,6 +440,17 @@ public class CatalogService {
                 .build();
     }
 
+    private String normalizeImage(String raw) {
+        if (!StringUtils.hasText(raw)) return null;
+        return raw.trim();
+    }
+
+    private boolean isDataUrl(String value) {
+        if (!StringUtils.hasText(value)) return false;
+        String v = value.trim().toLowerCase();
+        return v.startsWith("data:");
+    }
+
     private void ensureStockBase(Product product, Integer stockBaseValue) {
         int base = stockBaseValue != null ? stockBaseValue : (product.getStock() != null ? product.getStock() : 0);
         ProductStockBase stockBase = productStockBaseRepository.findByProduct(product)
@@ -396,4 +458,36 @@ public class CatalogService {
         stockBase.setStockBase(base);
         productStockBaseRepository.save(stockBase);
     }
+
+    private void updateReviewStats(Long productId) {
+        long count = productReviewRepository.countByProductId(productId);
+        double avg = productReviewRepository.averageRating(productId).orElse(0.0);
+        productRepository.findById(productId).ifPresent(p -> {
+            p.setReviewCount(count);
+            p.setReviewAvg(avg);
+            productRepository.save(p);
+        });
+    }
+
+    private void invalidateProductsCache() {
+        productsCache.clear();
+    }
+
+    private List<ProductResponse> getCache(String key) {
+        CacheEntry<List<ProductResponse>> entry = productsCache.get(key);
+        if (entry == null) return null;
+        if (entry.expiresAt < System.currentTimeMillis()) {
+            productsCache.remove(key);
+            return null;
+        }
+        return entry.value;
+    }
+
+    private void putCache(String key, List<ProductResponse> value) {
+        productsCache.put(key, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MS));
+    }
+
+    private record CacheEntry<T>(T value, long expiresAt) {}
+
+    private record ReviewStats(long count, double avg) {}
 }
