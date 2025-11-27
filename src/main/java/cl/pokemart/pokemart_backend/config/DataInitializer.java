@@ -23,11 +23,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
@@ -37,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -52,6 +57,8 @@ public class DataInitializer implements CommandLineRunner {
     private final OrderService orderService;
     private final BlogService blogService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${app.uploads.dir:uploads}")
+    private String uploadsDir;
 
     public DataInitializer(UserService userService,
                            CategoryRepository categoryRepository,
@@ -345,6 +352,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Product ensureProduct(String name, String description, Category category, String imageUrl, BigDecimal price, int stock) {
+        String normalizedImage = persistImageSeed(imageUrl, name);
         Product product = productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst()
@@ -352,7 +360,7 @@ public class DataInitializer implements CommandLineRunner {
                         .name(name)
                         .description(description)
                         .category(category)
-                        .imageUrl(imageUrl)
+                        .imageUrl(normalizedImage)
                         .price(price)
                         .stock(stock)
                         .active(true)
@@ -503,12 +511,48 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-        private InputStream readResource(String path) {
+    private InputStream readResource(String path) {
         try {
             ClassPathResource resource = new ClassPathResource(path);
             return resource.exists() ? resource.getInputStream() : null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private String persistImageSeed(String rawImage, String nameHint) {
+        if (rawImage == null || rawImage.isBlank()) return null;
+        String value = rawImage.trim();
+        // Si ya es URL pública o /uploads, devolver tal cual
+        if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/uploads/")) {
+            return value;
+        }
+        try {
+            Path baseDir = Paths.get(uploadsDir).toAbsolutePath().normalize().resolve("products");
+            Files.createDirectories(baseDir);
+
+            String ext = "png";
+            String data = value;
+            if (value.startsWith("data:")) {
+                int comma = value.indexOf(',');
+                if (comma > 0) {
+                    String meta = value.substring(5, comma);
+                    if (meta.contains("jpeg") || meta.contains("jpg")) ext = "jpg";
+                    else if (meta.contains("webp")) ext = "webp";
+                    data = value.substring(comma + 1);
+                }
+            } else if (value.contains("base64,")) {
+                data = value.substring(value.indexOf("base64,") + 7);
+            }
+            byte[] bytes = java.util.Base64.getDecoder().decode(data);
+            String safeName = slugify(nameHint != null ? nameHint : UUID.randomUUID().toString());
+            String filename = safeName + "-" + UUID.randomUUID() + "." + ext;
+            Path target = baseDir.resolve(filename);
+            Files.write(target, bytes);
+            return "/uploads/products/" + filename;
+        } catch (Exception e) {
+            log.warn("No se pudo persistir imagen seed, se deja valor original: {}", e.getMessage());
+            return value;
         }
     }
 
