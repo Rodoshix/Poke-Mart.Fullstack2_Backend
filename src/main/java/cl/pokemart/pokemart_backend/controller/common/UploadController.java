@@ -1,10 +1,12 @@
 package cl.pokemart.pokemart_backend.controller.common;
 
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.service.common.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/uploads")
 @Tag(name = "Uploads", description = "Carga de archivos (imágenes) para productos/usuarios")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "413", description = "Archivo demasiado grande", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "415", description = "Tipo de archivo no soportado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+})
 public class UploadController {
 
     private final FileStorageService fileStorageService;

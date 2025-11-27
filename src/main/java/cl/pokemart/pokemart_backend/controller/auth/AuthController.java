@@ -4,6 +4,7 @@ import cl.pokemart.pokemart_backend.dto.auth.AuthResponse;
 import cl.pokemart.pokemart_backend.dto.auth.LoginRequest;
 import cl.pokemart.pokemart_backend.dto.auth.RefreshRequest;
 import cl.pokemart.pokemart_backend.dto.auth.RegisterRequest;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.security.JwtService;
 import cl.pokemart.pokemart_backend.service.user.UserService;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Auth", description = "Autenticación y registro de usuarios")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Credenciales inválidas / no autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+})
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -60,7 +68,7 @@ public class AuthController {
     }
 
     @Operation(summary = "Registrar usuario", description = "Crea cuenta de cliente y devuelve tokens JWT + perfil.")
-    @ApiResponse(responseCode = "200", description = "Usuario registrado",
+    @ApiResponse(responseCode = "201", description = "Usuario registrado",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class)))
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {

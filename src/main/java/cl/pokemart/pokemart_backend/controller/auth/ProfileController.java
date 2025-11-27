@@ -2,9 +2,14 @@ package cl.pokemart.pokemart_backend.controller.auth;
 
 import cl.pokemart.pokemart_backend.dto.auth.Profile;
 import cl.pokemart.pokemart_backend.dto.auth.ProfileUpdateRequest;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,6 +28,13 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/v1/profile")
 @Tag(name = "Perfil", description = "Gestión del perfil del usuario autenticado")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+})
 public class ProfileController {
 
     private final UserService userService;
@@ -31,6 +44,8 @@ public class ProfileController {
     }
 
     @Operation(summary = "Perfil actual", description = "Obtiene los datos del usuario autenticado.")
+    @ApiResponse(responseCode = "200", description = "Perfil",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Profile.class)))
     @GetMapping
     public Profile getProfile(@AuthenticationPrincipal User principal) {
         User user = ensureUser(principal);
@@ -38,7 +53,10 @@ public class ProfileController {
     }
 
     @Operation(summary = "Actualizar perfil", description = "Actualiza los datos del usuario autenticado.")
+    @ApiResponse(responseCode = "200", description = "Perfil actualizado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Profile.class)))
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public Profile updateProfile(@Valid @RequestBody ProfileUpdateRequest request, Authentication authentication) {
         User user = currentUser(authentication);
 

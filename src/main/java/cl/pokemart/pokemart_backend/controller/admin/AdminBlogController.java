@@ -3,14 +3,17 @@ package cl.pokemart.pokemart_backend.controller.admin;
 import cl.pokemart.pokemart_backend.dto.blog.AdminBlogResponse;
 import cl.pokemart.pokemart_backend.dto.blog.BlogRequest;
 import cl.pokemart.pokemart_backend.dto.blog.BlogStatusRequest;
+import cl.pokemart.pokemart_backend.dto.common.ErrorResponse;
 import cl.pokemart.pokemart_backend.model.blog.BlogStatus;
 import cl.pokemart.pokemart_backend.service.blog.BlogService;
-import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,6 +34,14 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/blogs")
 @Tag(name = "Admin - Blogs", description = "Gestión de blogs (admin)")
 @PreAuthorize("hasRole('ADMIN')")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "No encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "409", description = "Conflicto o regla de negocio", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+})
 public class AdminBlogController {
 
     private final BlogService blogService;
@@ -38,7 +51,7 @@ public class AdminBlogController {
     }
 
     @Operation(summary = "Listado admin de blogs", description = "Filtra por categoría, estado o texto.")
-    @ApiResponse(responseCode = "200", description = "Listado",
+    @ApiResponse(responseCode = "200", description = "Listado de blogs",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminBlogResponse.class)))
     @GetMapping
     public List<AdminBlogResponse> list(
@@ -50,32 +63,39 @@ public class AdminBlogController {
     }
 
     @Operation(summary = "Crear blog", description = "Crea una nueva entrada de blog.")
+    @ApiResponse(responseCode = "201", description = "Blog creado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminBlogResponse.class)))
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public AdminBlogResponse create(@Valid @RequestBody BlogRequest request) {
         return blogService.create(request);
     }
 
     @Operation(summary = "Actualizar blog", description = "Modifica título, contenido, estado e imagen.")
+    @ApiResponse(responseCode = "200", description = "Blog actualizado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminBlogResponse.class)))
     @PutMapping("/{id}")
     public AdminBlogResponse update(@PathVariable Long id, @Valid @RequestBody BlogRequest request) {
         return blogService.update(id, request);
     }
 
     @Operation(summary = "Actualizar estado de blog", description = "Cambia el estado (PUBLISHED, DRAFT, HIDDEN).")
+    @ApiResponse(responseCode = "200", description = "Estado actualizado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminBlogResponse.class)))
     @PatchMapping("/{id}/estado")
     public AdminBlogResponse updateStatus(@PathVariable Long id, @Valid @RequestBody BlogStatusRequest request) {
         try {
             BlogStatus status = BlogStatus.valueOf(request.getEstado().trim().toUpperCase());
             return blogService.updateStatus(id, status);
         } catch (IllegalArgumentException ex) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.BAD_REQUEST,
-                    "Estado inválido");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estado inválido");
         }
     }
 
     @Operation(summary = "Eliminar blog", description = "Elimina una entrada de blog por ID.")
+    @ApiResponse(responseCode = "204", description = "Eliminado")
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         blogService.delete(id);
     }
