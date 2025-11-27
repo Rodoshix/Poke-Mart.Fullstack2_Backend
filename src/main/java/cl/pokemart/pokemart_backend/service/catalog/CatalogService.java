@@ -1,24 +1,24 @@
 package cl.pokemart.pokemart_backend.service.catalog;
 
-import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
-import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.AdminOfferResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.AdminReviewResponse;
+import cl.pokemart.pokemart_backend.dto.catalog.ProductRequest;
+import cl.pokemart.pokemart_backend.dto.catalog.ProductResponse;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewRequest;
 import cl.pokemart.pokemart_backend.dto.catalog.ReviewResponse;
-import cl.pokemart.pokemart_backend.dto.catalog.AdminReviewResponse;
 import cl.pokemart.pokemart_backend.model.catalog.Category;
 import cl.pokemart.pokemart_backend.model.catalog.Product;
 import cl.pokemart.pokemart_backend.model.catalog.ProductOffer;
-import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.catalog.ProductReview;
+import cl.pokemart.pokemart_backend.model.catalog.ProductStockBase;
 import cl.pokemart.pokemart_backend.model.user.Role;
 import cl.pokemart.pokemart_backend.model.user.User;
 import cl.pokemart.pokemart_backend.repository.catalog.CategoryRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductOfferRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductRepository;
-import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.catalog.ProductReviewRepository;
+import cl.pokemart.pokemart_backend.repository.catalog.ProductStockBaseRepository;
 import cl.pokemart.pokemart_backend.repository.order.OrderItemRepository;
 import cl.pokemart.pokemart_backend.service.common.FileStorageService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,10 +28,11 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,8 +46,9 @@ public class CatalogService {
     private final OrderItemRepository orderItemRepository;
     private final ProductReviewRepository productReviewRepository;
     private final FileStorageService fileStorageService;
-    private final java.util.concurrent.ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> productsCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     private static final long CACHE_TTL_MS = 60_000; // 60s
+    private final ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> productsCache = new ConcurrentHashMap<>();
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
@@ -64,7 +66,7 @@ public class CatalogService {
         this.fileStorageService = fileStorageService;
     }
 
-    // Public
+    // Public catalog
     @Transactional(readOnly = true)
     public List<ProductResponse> listProducts(String categorySlug) {
         String cacheKey = StringUtils.hasText(categorySlug) ? "cat:" + categorySlug.toLowerCase() : "all";
@@ -80,24 +82,6 @@ public class CatalogService {
                 .toList();
         putCache(cacheKey, response);
         return response;
-    }
-
-    @Transactional(readOnly = true)
-    public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
-        ensureManager(current);
-        List<ProductOffer> offers = includeInactive ? productOfferRepository.findAll() : productOfferRepository.findActive(LocalDateTime.now());
-        return offers.stream()
-                .filter(o -> isOfferVisibleForUser(o, current))
-                .map(AdminOfferResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public AdminOfferResponse getOfferForManagement(Long id, User current) {
-        ensureManager(current);
-        ProductOffer offer = productOfferRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
-        return AdminOfferResponse.from(offer);
     }
 
     @Transactional(readOnly = true)
@@ -150,6 +134,7 @@ public class CatalogService {
         return ReviewResponse.from(saved);
     }
 
+    // Management (admin/vendedor)
     @Transactional(readOnly = true)
     public List<ProductResponse> listProductsForManagement(boolean includeInactive, User current) {
         ensureManager(current);
@@ -169,7 +154,27 @@ public class CatalogService {
         return mapToResponse(product, findOfferForProduct(product, offers), null);
     }
 
-    // Admin/Vendedor
+    @Transactional(readOnly = true)
+    public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
+        ensureManager(current);
+        List<ProductOffer> offers = includeInactive
+                ? productOfferRepository.findAll()
+                : productOfferRepository.findActive(LocalDateTime.now());
+        return offers.stream()
+                .filter(o -> isOfferVisibleForUser(o, current))
+                .map(AdminOfferResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminOfferResponse getOfferForManagement(Long id, User current) {
+        ensureManager(current);
+        ProductOffer offer = productOfferRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
+        return AdminOfferResponse.from(offer);
+    }
+
+    // Admin operations
     public ProductResponse createProduct(ProductRequest request, User current) {
         ensureAdmin(current);
         Category category = resolveCategory(request.getCategoriaSlug(), request.getCategoriaSlug());
@@ -210,7 +215,6 @@ public class CatalogService {
         if (request.getStockBase() != null) {
             ensureStockBase(product, request.getStockBase());
         }
-        // Si la imagen cambió, intenta borrar la anterior para no dejar archivos huérfanos (solo si era un archivo/URL)
         if (StringUtils.hasText(previousImageUrl)
                 && imageValue != null
                 && !previousImageUrl.equals(imageValue)
@@ -238,6 +242,7 @@ public class CatalogService {
         String imageUrl = product.getImageUrl();
         if (!hardDelete) {
             product.setActive(false);
+            invalidateProductsCache();
             return;
         }
         var offers = productOfferRepository.findByProduct(product);
@@ -259,9 +264,7 @@ public class CatalogService {
         ensureAdmin(current);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-        if (discountPct == null || discountPct <= 0 || discountPct > 99) {
-            throw new IllegalArgumentException("Descuento invalido (1-99%)");
-        }
+        validateDiscount(discountPct);
         ProductOffer offer = ProductOffer.builder()
                 .product(product)
                 .discountPct(discountPct)
@@ -285,6 +288,7 @@ public class CatalogService {
                 .active(request.getActive() == null ? true : request.getActive())
                 .build();
         ProductOffer saved = productOfferRepository.save(offer);
+        invalidateProductsCache();
         return AdminOfferResponse.from(saved);
     }
 
@@ -312,6 +316,7 @@ public class CatalogService {
         ProductOffer offer = productOfferRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Oferta no encontrada"));
         offer.setActive(active);
+        invalidateProductsCache();
         return AdminOfferResponse.from(offer);
     }
 
@@ -384,7 +389,9 @@ public class CatalogService {
 
     private Optional<ProductOffer> findOfferForProduct(Product product, List<ProductOffer> offers) {
         if (offers == null) return Optional.empty();
-        return offers.stream().filter(o -> o.getProduct().getId().equals(product.getId()) && !o.isExpired()).findFirst();
+        return offers.stream()
+                .filter(o -> o.getProduct().getId().equals(product.getId()) && !o.isExpired())
+                .findFirst();
     }
 
     private Map<Long, ReviewStats> aggregateReviewStats(List<Product> products) {
@@ -396,8 +403,6 @@ public class CatalogService {
                         row -> new ReviewStats(((Number) row[1]).longValue(), row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)
                 ));
     }
-
-    private record ReviewStats(long count, double avg) {}
 
     private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt, Map<Long, ReviewStats> statsMap) {
         ProductResponse.OfferInfo offerInfo = null;
@@ -437,8 +442,7 @@ public class CatalogService {
 
     private String normalizeImage(String raw) {
         if (!StringUtils.hasText(raw)) return null;
-        String value = raw.trim();
-        return value;
+        return raw.trim();
     }
 
     private boolean isDataUrl(String value) {
@@ -487,5 +491,3 @@ public class CatalogService {
 
     private record ReviewStats(long count, double avg) {}
 }
-
-
