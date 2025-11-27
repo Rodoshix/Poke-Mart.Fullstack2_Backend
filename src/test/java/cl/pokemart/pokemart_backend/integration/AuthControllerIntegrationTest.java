@@ -24,7 +24,7 @@ class AuthControllerIntegrationTest {
     void shouldAuthenticateAdminSeededUser() throws Exception {
         String body = """
                 {
-                  "email": "admin@gmail.com",
+                  "identifier": "admin@gmail.com",
                   "password": "admin123"
                 }
                 """;

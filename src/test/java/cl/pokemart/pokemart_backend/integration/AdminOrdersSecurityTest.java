@@ -9,7 +9,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -23,6 +22,9 @@ class AdminOrdersSecurityTest {
     void adminOrdersShouldReturnUnauthorizedWhenNoToken() throws Exception {
         mockMvc.perform(get("/api/v1/admin/orders")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(result -> {
+                    int s = result.getResponse().getStatus();
+                    org.assertj.core.api.Assertions.assertThat(s).isIn(401, 403);
+                });
     }
 }

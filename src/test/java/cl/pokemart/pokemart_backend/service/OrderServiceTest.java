@@ -74,7 +74,6 @@ class OrderServiceTest {
                 .product(product)
                 .discountPct(10)
                 .active(true)
-                .startsAt(LocalDateTime.now().minusDays(1))
                 .endsAt(LocalDateTime.now().plusDays(1))
                 .build();
 
