@@ -67,12 +67,17 @@ public class AdminReviewController {
         this.catalogService = catalogService;
     }
 
-    @Operation(summary = "Listado de reseñas", description = "Devuelve todas las reseñas registradas.")
-    @ApiResponse(responseCode = "200", description = "Listado",
+    @Operation(summary = "Listado de reseñas", description = "Devuelve reseñas con filtros y paginación.")
+    @ApiResponse(responseCode = "200", description = "Listado paginado",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminReviewResponse.class)))
     @GetMapping
-    public List<AdminReviewResponse> list() {
-        return catalogService.listReviewsAdmin();
+    public org.springframework.data.domain.Page<AdminReviewResponse> list(
+            @org.springframework.web.bind.annotation.RequestParam(value = "categoria", required = false) String category,
+            @org.springframework.web.bind.annotation.RequestParam(value = "productoId", required = false) Long productId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "page", defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        return catalogService.listReviewsAdminPage(category, productId, page, size);
     }
 
     @Operation(summary = "Eliminar reseña", description = "Elimina una reseña por su ID.")

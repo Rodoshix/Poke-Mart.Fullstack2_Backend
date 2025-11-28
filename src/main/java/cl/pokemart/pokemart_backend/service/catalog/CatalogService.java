@@ -120,6 +120,15 @@ public class CatalogService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<AdminReviewResponse> listReviewsAdminPage(String category, Long productId, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(5, size), 100);
+        var pageable = org.springframework.data.domain.PageRequest.of(safePage, safeSize);
+        return productReviewRepository.findForAdmin(category, productId, pageable)
+                .map(AdminReviewResponse::from);
+    }
+
     public ReviewResponse addReview(Long productId, ReviewRequest request, User current) {
         if (current == null) throw new SecurityException("No autenticado");
         Product product = productRepository.findById(productId)
