@@ -49,6 +49,8 @@ public class CatalogService {
 
     private static final long CACHE_TTL_MS = 60_000; // 60s
     private final ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> productsCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CacheEntry<List<ProductResponse>>> adminProductsCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CacheEntry<List<AdminOfferResponse>>> adminOffersCache = new ConcurrentHashMap<>();
 
     public CatalogService(CategoryRepository categoryRepository,
                           ProductRepository productRepository,
@@ -139,11 +141,18 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public List<ProductResponse> listProductsForManagement(boolean includeInactive, User current) {
         ensureManager(current);
+        String cacheKey = "admin:prod:" + (includeInactive ? "all" : "active");
+        List<ProductResponse> cached = getAdminProductsCache(cacheKey);
+        if (cached != null) return cached;
+
         List<Product> products = includeInactive ? productRepository.findAll() : productRepository.findAllActive();
         var offers = productOfferRepository.findActive(LocalDateTime.now());
-        return products.stream()
-                .map(p -> mapToResponse(p, findOfferForProduct(p, offers), null))
+        Map<Long, Integer> stockBaseMap = loadStockBaseForProducts(products);
+        List<ProductResponse> result = products.stream()
+                .map(p -> mapToResponse(p, findOfferForProduct(p, offers), null, stockBaseMap))
                 .toList();
+        putAdminProductsCache(cacheKey, result);
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -158,13 +167,19 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public List<AdminOfferResponse> listOffersForManagement(boolean includeInactive, User current) {
         ensureManager(current);
+        String cacheKey = "admin:offers:" + (includeInactive ? "all" : "active");
+        List<AdminOfferResponse> cached = getAdminOffersCache(cacheKey);
+        if (cached != null) return cached;
+
         List<ProductOffer> offers = includeInactive
                 ? productOfferRepository.findAll()
                 : productOfferRepository.findActive(LocalDateTime.now());
-        return offers.stream()
+        List<AdminOfferResponse> result = offers.stream()
                 .filter(o -> isOfferVisibleForUser(o, current))
                 .map(AdminOfferResponse::from)
                 .toList();
+        putAdminOffersCache(cacheKey, result);
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -405,6 +420,23 @@ public class CatalogService {
                 ));
     }
 
+    private Map<Long, Integer> loadStockBaseForProducts(List<Product> products) {
+        if (products == null || products.isEmpty()) return Map.of();
+        List<Long> productIds = products.stream()
+                .filter(p -> p != null && p.getId() != null)
+                .map(Product::getId)
+                .distinct()
+                .toList();
+        if (productIds.isEmpty()) return Map.of();
+        return productStockBaseRepository.findByProductIdIn(productIds).stream()
+                .filter(psb -> psb.getProduct() != null && psb.getProduct().getId() != null)
+                .collect(Collectors.toMap(
+                        psb -> psb.getProduct().getId(),
+                        ProductStockBase::getStockBase,
+                        (a, b) -> a
+                ));
+    }
+
     private Map<Long, Integer> loadStockBase(List<ProductOffer> offers) {
         if (offers == null || offers.isEmpty()) return Map.of();
         List<Long> productIds = offers.stream()
@@ -421,6 +453,34 @@ public class CatalogService {
                         ProductStockBase::getStockBase,
                         (a, b) -> a
                 ));
+    }
+
+    private List<ProductResponse> getAdminProductsCache(String key) {
+        CacheEntry<List<ProductResponse>> entry = adminProductsCache.get(key);
+        if (entry == null) return null;
+        if (entry.expiresAt < System.currentTimeMillis()) {
+            adminProductsCache.remove(key);
+            return null;
+        }
+        return entry.value;
+    }
+
+    private void putAdminProductsCache(String key, List<ProductResponse> value) {
+        adminProductsCache.put(key, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MS));
+    }
+
+    private List<AdminOfferResponse> getAdminOffersCache(String key) {
+        CacheEntry<List<AdminOfferResponse>> entry = adminOffersCache.get(key);
+        if (entry == null) return null;
+        if (entry.expiresAt < System.currentTimeMillis()) {
+            adminOffersCache.remove(key);
+            return null;
+        }
+        return entry.value;
+    }
+
+    private void putAdminOffersCache(String key, List<AdminOfferResponse> value) {
+        adminOffersCache.put(key, new CacheEntry<>(value, System.currentTimeMillis() + CACHE_TTL_MS));
     }
 
     private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt, Map<Long, ReviewStats> statsMap) {
@@ -499,6 +559,8 @@ public class CatalogService {
 
     private void invalidateProductsCache() {
         productsCache.clear();
+        adminProductsCache.clear();
+        adminOffersCache.clear();
     }
 
     private List<ProductResponse> getCache(String key) {
