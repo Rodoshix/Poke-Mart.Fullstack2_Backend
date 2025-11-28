@@ -17,6 +17,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -26,6 +28,8 @@ public class UserService implements UserDetailsService {
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrderRepository orderRepository;
+    private static final long CACHE_TTL_MS = 60_000; // 60s
+    private final ConcurrentHashMap<String, CacheEntry<List<User>>> adminUsersCache = new ConcurrentHashMap<>();
 
     public UserService(UserRepository userRepository,
                        UserProfileRepository userProfileRepository,
@@ -144,7 +148,11 @@ public class UserService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public java.util.List<User> findAll() {
-        return userRepository.findAll();
+        List<User> cached = getAdminUsersCache();
+        if (cached != null) return cached;
+        List<User> users = userRepository.findAllWithProfile();
+        putAdminUsersCache(users);
+        return users;
     }
 
     @Transactional(readOnly = true)
@@ -251,7 +259,23 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    private List<User> getAdminUsersCache() {
+        CacheEntry<List<User>> entry = adminUsersCache.get("all");
+        if (entry == null) return null;
+        if (entry.expiresAt < System.currentTimeMillis()) {
+            adminUsersCache.remove("all");
+            return null;
+        }
+        return entry.value;
+    }
+
+    private void putAdminUsersCache(List<User> users) {
+        adminUsersCache.put("all", new CacheEntry<>(users, System.currentTimeMillis() + CACHE_TTL_MS));
+    }
+
     private String normalize(String value) {
         return value == null ? null : value.trim().toLowerCase();
     }
+
+    private record CacheEntry<T>(T value, long expiresAt) {}
 }

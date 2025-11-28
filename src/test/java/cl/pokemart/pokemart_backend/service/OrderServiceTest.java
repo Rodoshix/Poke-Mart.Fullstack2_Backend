@@ -102,4 +102,41 @@ class OrderServiceTest {
         // 10% descuento sobre 1000 => 900 cada uno, 2 unidades = 1800 total
         assertThat(response.getTotal()).isEqualByComparingTo(BigDecimal.valueOf(1800));
     }
+
+    @Test
+    void shouldFloorToTenPesosWhenDiscountIsNinetyNinePercent() {
+        product.setPrice(BigDecimal.valueOf(990));
+
+        ProductOffer offer = ProductOffer.builder()
+                .id(7L)
+                .product(product)
+                .discountPct(99)
+                .active(true)
+                .endsAt(LocalDateTime.now().plusHours(1))
+                .build();
+
+        when(productRepository.findActiveByIdForUpdate(1L)).thenReturn(Optional.of(product));
+        when(productOfferRepository.findActive(any(LocalDateTime.class))).thenReturn(List.of(offer));
+
+        OrderRequest request = new OrderRequest(
+                "Tester",
+                "Unit",
+                "tester@example.com",
+                "+56900000000",
+                "Kanto",
+                "Ciudad Central",
+                "Calle 1",
+                "Depto 2",
+                "Notas",
+                "credit",
+                BigDecimal.ZERO,
+                List.of(new OrderItemRequest(1L, 1))
+        );
+
+        OrderResponse response = orderService.createOrder(request, null);
+
+        assertThat(response.getTotal()).isEqualByComparingTo(BigDecimal.valueOf(10));
+        assertThat(response.getItems()).hasSize(1);
+        assertThat(response.getItems().get(0).getPrecioUnitario()).isEqualByComparingTo(BigDecimal.valueOf(10));
+    }
 }

@@ -165,8 +165,15 @@ public class OrderService {
         if (pct <= 0 || pct > 99) return base;
         BigDecimal multiplier = BigDecimal.valueOf(100 - pct).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
         BigDecimal discounted = base.multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
-        if (discounted.compareTo(BigDecimal.ONE) < 0) {
-            return BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP);
+        if (pct >= 99 && base.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal minForMaxDiscount = BigDecimal.TEN.setScale(2, RoundingMode.HALF_UP);
+            if (discounted.compareTo(minForMaxDiscount) < 0) {
+                return minForMaxDiscount;
+            }
+        }
+        BigDecimal minimum = BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP);
+        if (discounted.compareTo(minimum) < 0) {
+            return minimum;
         }
         return discounted;
     }

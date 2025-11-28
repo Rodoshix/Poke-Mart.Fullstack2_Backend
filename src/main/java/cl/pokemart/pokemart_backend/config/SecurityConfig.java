@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/access/public").permitAll()
                         .requestMatchers("/api/v1/payments/mp/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**", "/api/v1/offers/**", "/api/v1/blogs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/offers/**", "/api/v1/admin/orders/**").hasAnyRole("ADMIN","VENDEDOR")
@@ -80,10 +81,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://poke-mart-ecommerce.netlify.app",
+                "https://poke-martfullstack2backend-production.up.railway.app",
+                "https://poke-mart-fullstack2-front-5eu935mnc-rodoshixs-projects.vercel.app",
+                "https://*.vercel.app",
+                "http://localhost:5173",
+                "http://localhost:4173",
+                "http://localhost:3000",
+                "http://localhost:8080"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true); // para incluir Authorization desde front
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
