@@ -121,6 +121,11 @@ public class CatalogService {
     }
 
     @Transactional(readOnly = true)
+    public List<String> listReviewCategories() {
+        return productReviewRepository.findDistinctCategoriesInReviews();
+    }
+
+    @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<AdminReviewResponse> listReviewsAdminPage(String category, Long productId, int page, int size) {
         int safePage = Math.max(0, page);
         int safeSize = Math.min(Math.max(5, size), 100);

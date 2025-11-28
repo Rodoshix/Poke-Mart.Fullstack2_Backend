@@ -80,6 +80,13 @@ public class AdminReviewController {
         return catalogService.listReviewsAdminPage(category, productId, page, size);
     }
 
+    @Operation(summary = "Categorias con reseñas", description = "Devuelve las categorías presentes en reseñas para filtrar.")
+    @ApiResponse(responseCode = "200", description = "Listado de categorías")
+    @GetMapping("/categories")
+    public java.util.List<String> listCategories() {
+        return catalogService.listReviewCategories();
+    }
+
     @Operation(summary = "Eliminar reseña", description = "Elimina una reseña por su ID.")
     @ApiResponse(responseCode = "204", description = "Eliminada")
     @DeleteMapping("/{id}")

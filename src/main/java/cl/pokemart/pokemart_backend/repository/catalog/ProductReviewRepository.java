@@ -17,6 +17,9 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     @Query("select r from ProductReview r join fetch r.product p left join fetch p.category c left join fetch r.user u order by r.createdAt desc")
     List<ProductReview> findAllWithProduct();
 
+    @Query("select distinct lower(c.name) from ProductReview r join r.product p left join p.category c where c.name is not null")
+    List<String> findDistinctCategoriesInReviews();
+
     @Query(
             value = """
                     select r from ProductReview r
