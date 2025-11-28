@@ -59,6 +59,8 @@ public class DataInitializer implements CommandLineRunner {
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${app.uploads.dir:uploads}")
     private String uploadsDir;
+    @Value("${app.seed.enabled:false}")
+    private boolean seedEnabled;
 
     public DataInitializer(UserService userService,
                            CategoryRepository categoryRepository,
@@ -80,6 +82,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if (!seedEnabled) {
+            log.info("Seed de datos deshabilitado (app.seed.enabled=false)");
+            return;
+        }
         seedUsersAndCatalog();
         seedOrdersDemo();
     }
