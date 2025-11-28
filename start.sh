@@ -23,6 +23,10 @@ export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -Doracle.net.tns_admin=$WALLET_
 echo ">> TNS_ADMIN=$TNS_ADMIN"
 echo ">> Wallet detectado en: $WALLET_DIR"
 
+# Log de entorno relevante para debug en Railway
+echo ">> PORT=${PORT:-<no-definido>}"
+echo ">> JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:-<no-definido>}"
+
 # Volver al directorio raiz de la app para que gradlew/JAR esten disponibles
 cd "$APP_DIR"
 
