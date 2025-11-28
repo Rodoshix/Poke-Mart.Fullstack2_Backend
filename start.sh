@@ -41,9 +41,15 @@ fi
 
 if [ -n "$JAR" ]; then
   echo ">> Ejecutando JAR: $JAR"
-  exec java -jar "$JAR"
+  java -jar "$JAR"
+  rc=$?
+  echo ">> Proceso Java finalizó con código: $rc"
+  exit $rc
 fi
 
 echo ">> Ejecutando ./gradlew bootRun"
 chmod +x ./gradlew || true
-exec ./gradlew bootRun --no-daemon
+./gradlew bootRun --no-daemon
+rc=$?
+echo ">> gradlew bootRun finalizó con código: $rc"
+exit $rc
