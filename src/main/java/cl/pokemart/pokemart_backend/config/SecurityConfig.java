@@ -81,9 +81,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
                 "https://poke-mart-ecommerce.netlify.app",
                 "https://poke-martfullstack2backend-production.up.railway.app",
+                "https://poke-mart-fullstack2-front-5eu935mnc-rodoshixs-projects.vercel.app",
+                "https://*.vercel.app",
                 "http://localhost:5173",
                 "http://localhost:4173",
                 "http://localhost:3000",
