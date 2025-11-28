@@ -87,9 +87,10 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public List<ProductResponse> listActiveOffers() {
         var offers = productOfferRepository.findActive(LocalDateTime.now());
+        Map<Long, Integer> stockBaseMap = loadStockBase(offers);
         return offers.stream()
                 .filter(o -> o.getProduct() != null && Boolean.TRUE.equals(o.getProduct().getActive()))
-                .map(o -> mapToResponse(o.getProduct(), Optional.of(o), null))
+                .map(o -> mapToResponse(o.getProduct(), Optional.of(o), null, stockBaseMap))
                 .toList();
     }
 
@@ -404,7 +405,29 @@ public class CatalogService {
                 ));
     }
 
+    private Map<Long, Integer> loadStockBase(List<ProductOffer> offers) {
+        if (offers == null || offers.isEmpty()) return Map.of();
+        List<Long> productIds = offers.stream()
+                .map(ProductOffer::getProduct)
+                .filter(p -> p != null && p.getId() != null)
+                .map(Product::getId)
+                .distinct()
+                .toList();
+        if (productIds.isEmpty()) return Map.of();
+        return productStockBaseRepository.findByProductIdIn(productIds).stream()
+                .filter(psb -> psb.getProduct() != null && psb.getProduct().getId() != null)
+                .collect(Collectors.toMap(
+                        psb -> psb.getProduct().getId(),
+                        ProductStockBase::getStockBase,
+                        (a, b) -> a
+                ));
+    }
+
     private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt, Map<Long, ReviewStats> statsMap) {
+        return mapToResponse(product, offerOpt, statsMap, null);
+    }
+
+    private ProductResponse mapToResponse(Product product, Optional<ProductOffer> offerOpt, Map<Long, ReviewStats> statsMap, Map<Long, Integer> stockBaseMap) {
         ProductResponse.OfferInfo offerInfo = null;
         if (offerOpt.isPresent() && !offerOpt.get().isExpired()) {
             var o = offerOpt.get();
@@ -413,9 +436,14 @@ public class CatalogService {
                     .endsAt(o.getEndsAt() != null ? o.getEndsAt().toString() : null)
                     .build();
         }
-        Integer stockBase = productStockBaseRepository.findByProductId(product.getId())
-                .map(ProductStockBase::getStockBase)
-                .orElse(null);
+        Integer stockBase = null;
+        if (stockBaseMap != null && stockBaseMap.containsKey(product.getId())) {
+            stockBase = stockBaseMap.get(product.getId());
+        } else {
+            stockBase = productStockBaseRepository.findByProductId(product.getId())
+                    .map(ProductStockBase::getStockBase)
+                    .orElse(null);
+        }
         long reviewCount = product.getReviewCount() != null ? product.getReviewCount() : 0L;
         double reviewAvg = product.getReviewAvg() != null ? product.getReviewAvg() : 0.0;
         if (statsMap != null && statsMap.containsKey(product.getId())) {
