@@ -114,6 +114,16 @@ public class AdminOfferController {
         return catalogService.updateOffer(id, request, currentUser(auth));
     }
 
+    @Operation(summary = "Activar/desactivar oferta", description = "Cambia el estado activo de una oferta.")
+    @ApiResponse(responseCode = "200", description = "Estado actualizado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminOfferResponse.class)))
+    @PutMapping("/{id}/status")
+    public AdminOfferResponse setActive(@PathVariable Long id,
+                                        @RequestParam(value = "active") boolean active,
+                                        Authentication auth) {
+        return catalogService.setOfferActive(id, active, currentUser(auth));
+    }
+
     @Operation(summary = "Eliminar oferta", description = "Eliminar o desactivar una oferta.")
     @ApiResponse(responseCode = "204", description = "Oferta eliminada/desactivada")
     @DeleteMapping("/{id}")
